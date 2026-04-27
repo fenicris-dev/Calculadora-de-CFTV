@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fênix | Sistema de Infraestrutura</title>
+    <style>
+        :root { --primary-color: #041273; --bg-color: #f1f5f9; --card-bg: #ffffff; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); color: #1e293b; padding: 10px; }
+        .container { background: var(--card-bg); padding: 1.5rem; border-radius: 12px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); width: 100%; max-width: 600px; border-top: 6px solid var(--primary-color); margin: auto; }
+        h2 { text-align: center; color: var(--primary-color); font-size: 1.2rem; text-transform: uppercase; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        label { display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; margin-bottom: 2px; }
+        input, select { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; }
+        .results { background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 15px; }
+        .res-line { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 5px; }
+        .res-val { font-weight: bold; color: var(--primary-color); }
+        .btn { border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: bold; width: 100%; transition: 0.3s; }
+        .btn-save { background: var(--primary-color); color: white; margin-bottom: 10px; }
+        .btn-copy { background: #e2e8f0; color: #475569; }
+        .search-section { margin-top: 20px; border-top: 2px solid #e2e8f0; padding-top: 15px; }
+        .history-item { background: white; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 8px; font-size: 0.75rem; }
+        footer { text-align: center; font-size: 7pt; color: gray; margin-top: 20px; }
+        @media print { .btn, .search-section, .input-group:first-child { display: none; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Fênix | Infraestrutura & Projetos</h2>
+    
+    <div class="grid" style="grid-template-columns: 1fr;">
+        <div class="input-group"><label>Técnico Responsável</label><input type="text" id="tecnico" value="Cristiano Rodrigues"></div>
+        <div class="input-group"><label>Nome do Cliente (Opcional)</label><input type="text" id="cliente" placeholder="Ex: Condomínio Solar"></div>
+    </div>
+
+    <div class="grid">
+        <div class="input-group"><label>Nº Câmeras</label><input type="number" id="cameras" oninput="calcular()"></div>
+        <div class="input-group"><label>FPS</label><input type="number" id="fps" oninput="calcular()"></div>
+        <div class="input-group">
+            <label>Resolução</label>
+            <select id="resolucao" onchange="calcular()">
+                <option value="2">1080p</option>
+                <option value="4">4MP</option>
+                <option value="8">4K</option>
+            </select>
+        </div>
+        <div class="input-group"><label>Dias Retenção</label><input type="number" id="dias" oninput="calcular()"></div>
+        <div class="input-group">
+            <label>Reserva Técnica</label>
+            <select id="reserva" onchange="calcular()">
+                <option value="1.1">10%</option>
+                <option value="1.2">20%</option>
+                <option value="1.3" selected>30%</option>
+            </select>
+        </div>
+        <div class="input-group"><label>Código Gerado</label><input type="text" id="codigo" readonly style="background: #eee;"></div>
+    </div>
+
+    <div class="results">
+        <div class="res-line"><span>Banda c/ Reserva:</span> <span class="res-val" id="bandaReal">0.00 Mbps</span></div>
+        <div class="res-line"><span>Consumo Período:</span> <span class="res-val" id="storageTotal">0.00 TB</span></div>
+        <div class="res-line" style="margin-top:10px; border-top: 1px solid #ddd; padding-top:5px;">
+            <strong>HD SUGERIDO:</strong> <span class="res-val" id="hdSugerido">---</span>
+        </div>
+    </div>
+
+    <button class="btn btn-save" onclick="salvarOrcamento()">Salvar no Sistema (LocalHost)</button>
+    <button class="btn btn-copy" onclick="copiarResumo()">Copiar para WhatsApp</button>
+
+    <div class="search-section">
+        <label>Buscar nos Registros (Nome ou Código)</label>
+        <input type="text" id="busca" placeholder="Digite para buscar..." oninput="listarHistorico()">
+        <div id="historico" style="margin-top: 10px;"></div>
+    </div>
+
+    <footer>
+        Desenvolvido por ©Fênix Soluções Tecnológicas 2026 | Aracaju - SE<br>
+        Zap: (79) 9 9968-0880 | Instagram: @fenixsolucoestecnologicas
+    </footer>
+</div>
+
+<script>
+    function gerarCodigo() {
+        return Math.floor(Date.now() / 1000).toString().slice(-6);
+    }
+
+    function calcular() {
+        const qtd = parseFloat(document.getElementById('cameras').value) || 0;
+        const res = parseFloat(document.getElementById('resolucao').value);
+        const fps = parseFloat(document.getElementById('fps').value) || 0;
+        const dias = parseFloat(document.getElementById('dias').value) || 0;
+        const reserva = parseFloat(document.getElementById('reserva').value);
+
+        let bitrate = (res * (fps / 30) * 1.8); // Média H.265+
+        let banda = (qtd * bitrate) * reserva;
+        let storageTB = ((qtd * bitrate * 86400) / 8 / 1024 / 1024) * dias;
+        let storageComReserva = storageTB * reserva;
+
+        document.getElementById('bandaReal').innerText = banda.toFixed(2) + " Mbps";
+        document.getElementById('storageTotal').innerText = storageTB.toFixed(2) + " TB";
+
+        const hds = [1, 2, 4, 6, 8, 10, 12, 16];
+        let sugestao = hds.find(h => h >= storageComReserva) || storageComReserva.toFixed(2);
+        document.getElementById('hdSugerido').innerText = sugestao + " TB (Surveillance)";
+        
+        if(!document.getElementById('codigo').value) document.getElementById('codigo').value = gerarCodigo();
+    }
+
+    function salvarOrcamento() {
+        const dados = {
+            id: document.getElementById('codigo').value,
+            tecnico: document.getElementById('tecnico').value,
+            cliente: document.getElementById('cliente').value || "Não informado",
+            cameras: document.getElementById('cameras').value,
+            dias: document.getElementById('dias').value,
+            hd: document.getElementById('hdSugerido').innerText,
+            data: new Date().toLocaleDateString()
+        };
+
+        let historico = JSON.parse(localStorage.getItem('fenix_db') || "[]");
+        historico.push(dados);
+        localStorage.setItem('fenix_db', JSON.stringify(historico));
+        alert("Orçamento #" + dados.id + " salvo com sucesso!");
+        document.getElementById('codigo').value = gerarCodigo();
+        listarHistorico();
+    }
+
+    function listarHistorico() {
+        const busca = document.getElementById('busca').value.toLowerCase();
+        const historico = JSON.parse(localStorage.getItem('fenix_db') || "[]");
+        const lista = document.getElementById('historico');
+        lista.innerHTML = "";
+
+        historico.reverse().filter(item => 
+            item.cliente.toLowerCase().includes(busca) || item.id.includes(busca)
+        ).forEach(item => {
+            lista.innerHTML += `
+                <div class="history-item">
+                    <strong>#${item.id} - ${item.cliente}</strong><br>
+                    Técnico: ${item.tecnico} | HD: ${item.hd} | Data: ${item.data}
+                </div>`;
+        });
+    }
+
+    function copiarResumo() {
+        const t = document.getElementById('tecnico').value;
+        const cl = document.getElementById('cliente').value;
+        const id = document.getElementById('codigo').value;
+        const st = document.getElementById('storageTotal').innerText;
+        const hd = document.getElementById('hdSugerido').innerText;
+
+        const texto = `*Fênix Soluções - Orçamento #${id}*\n` +
+                      `Cliente: ${cl}\n` +
+                      `Técnico: ${t}\n\n` +
+                      `• Volume de Dados: ${st}\n` +
+                      `• HD Recomendado: ${hd}\n\n` +
+                      `Planejado por Fênix Soluções Tecnológicas`;
+        
+        navigator.clipboard.writeText(texto);
+        alert("Copiado!");
+    }
+
+    window.onload = () => { listarHistorico(); document.getElementById('codigo').value = gerarCodigo(); };
+</script>
+
+</body>
+</html>
