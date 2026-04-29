@@ -1,230 +1,1472 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-br" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fênix | Hub de Projetos V.2.4</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <style>
-        :root { --primary: #040798; --danger: #dc2626; --success: #16a34a; --bg: #f1f5f9; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #1e293b; margin: 0; padding: 10px; }
-        .container { background: #fff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); width: 100%; max-width: 650px; border-top: 6px solid var(--primary); margin: auto; position: relative; }
-        .version { position: absolute; top: 10px; right: 15px; font-size: 0.6rem; color: #94a3b8; font-weight: bold; }
-        
-        .header-brand { text-align: center; margin-bottom: 15px; }
-        .header-brand h1 { color: var(--primary); font-size: 1.3rem; margin: 0; text-transform: uppercase; }
-        .header-brand p { font-size: 0.7rem; color: #64748b; font-weight: bold; margin: 2px 0; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#040798">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fênix Hub">
+<meta name="description" content="Fênix Soluções — Hub de Projetos CFTV">
+<link rel="manifest" id="manifestLink">
+<title>Fênix | Hub de Projetos v3.3</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#040798;--primary-l:#2d32d4;--primary-glow:rgba(4,7,152,.18);
+  --accent:#f97316;--accent-glow:rgba(249,115,22,.15);
+  --danger:#ef4444;--danger-bg:rgba(239,68,68,.13);
+  --success:#22c55e;--success-bg:rgba(34,197,94,.12);
+  --warn:#f59e0b;--warn-bg:rgba(245,158,11,.12);
+  --info:#818cf8;--info-bg:rgba(129,140,248,.12);
+  --bg:#080918;--surface:#111328;--surface2:#181b3a;--surface3:#1f2348;
+  --border:rgba(255,255,255,.07);--border-focus:rgba(45,50,212,.7);
+  --text:#e2e8f0;--text-muted:#7c8db5;--text-dim:#4a5580;
+  --shadow:0 20px 60px rgba(0,0,0,.5);
+  --radius:12px;--radius-sm:8px;--radius-xs:6px;--tr:.2s ease;
+}
+[data-theme="light"]{
+  --bg:#eef1fa;--surface:#fff;--surface2:#f4f6ff;--surface3:#eaedfc;
+  --border:rgba(0,0,0,.08);--border-focus:rgba(4,7,152,.45);
+  --text:#1e2245;--text-muted:#5a6690;--text-dim:#9aa3c0;
+  --shadow:0 20px 60px rgba(4,7,152,.09);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:14px 12px 36px;transition:background .3s,color .3s}
+[data-theme="dark"] body{background-image:radial-gradient(ellipse 60% 40% at 10% 0%,rgba(4,7,152,.22) 0%,transparent 70%),radial-gradient(ellipse 50% 40% at 90% 100%,rgba(249,115,22,.08) 0%,transparent 70%)}
 
-        .tabs { display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 2px solid #e2e8f0; }
-        .tab-btn { padding: 10px; cursor: pointer; border: none; background: none; font-size: 0.8rem; font-weight: bold; color: #64748b; }
-        .tab-btn.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+/* TOAST */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);padding:11px 22px;border-radius:50px;font-size:.82rem;font-weight:600;z-index:9999;transition:transform .4s cubic-bezier(.34,1.56,.64,1);pointer-events:none;white-space:nowrap;backdrop-filter:blur(10px);box-shadow:0 8px 30px rgba(0,0,0,.3)}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#toast.t-success{background:rgba(34,197,94,.95);color:#fff}
+#toast.t-error{background:rgba(239,68,68,.95);color:#fff}
+#toast.t-info{background:rgba(99,102,241,.95);color:#fff}
 
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        label { display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; margin-bottom: 2px; }
-        .input-icon { position: relative; }
-        .input-icon span { position: absolute; left: 8px; top: 8px; font-size: 0.9rem; }
-        input, select, textarea { width: 100%; padding: 8px 8px 8px 30px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 0.85rem; box-sizing: border-box; }
-        
-        .switch-container { display: flex; align-items: center; gap: 10px; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 10px; font-size: 0.8rem; }
+/* PWA INSTALL BANNER */
+#pwaBar{display:none;position:fixed;bottom:0;left:0;right:0;z-index:8000;background:linear-gradient(135deg,var(--primary),var(--primary-l));padding:12px 16px;align-items:center;gap:12px;box-shadow:0 -4px 20px rgba(4,7,152,.4)}
+#pwaBar.show{display:flex}
+#pwaBar p{flex:1;font-size:.8rem;color:#fff;font-weight:600}
+#pwaBar p span{display:block;font-size:.68rem;font-weight:400;opacity:.8;margin-top:1px}
+.pwa-btn{padding:8px 16px;border-radius:6px;border:none;font-size:.75rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif}
+.pwa-install{background:#fff;color:var(--primary)}
+.pwa-dismiss{background:rgba(255,255,255,.15);color:#fff}
 
-        .card-res { background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 10px; }
-        .line { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 5px; }
-        .val { font-weight: bold; color: var(--primary); }
+.container{max-width:700px;margin:auto}
 
-        .btn { border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: bold; width: 100%; margin-top: 5px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-save { background: var(--primary); color: white; }
-        .btn-pdf { background: #1e293b; color: white; }
-        
-        footer { text-align: center; font-size: 7pt; color: gray; margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; }
-    </style>
+/* HEADER */
+.header{display:flex;align-items:center;justify-content:space-between;padding:18px 4px 14px}
+.header-left{display:flex;align-items:center;gap:14px}
+.logo-icon{width:50px;height:50px;background:linear-gradient(135deg,var(--primary) 0%,var(--accent) 100%);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;box-shadow:0 0 28px var(--primary-glow),0 0 14px var(--accent-glow)}
+.header-text h1{font-family:'Rajdhani',sans-serif;font-size:1.7rem;font-weight:700;letter-spacing:3px;background:linear-gradient(90deg,var(--text) 0%,#818cf8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.header-text p{font-size:.62rem;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;margin-top:3px}
+.header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.version-badge{background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);font-size:.58rem;font-weight:700;padding:3px 8px;border-radius:20px;letter-spacing:1px}
+.icon-btn{width:36px;height:36px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--tr)}
+.icon-btn:hover{border-color:var(--primary-l);color:var(--text)}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+
+/* TABS */
+.tabs{display:flex;background:var(--surface2);border-bottom:1px solid var(--border)}
+.tab-btn{flex:1;padding:12px 4px;cursor:pointer;border:none;background:none;font-size:.62rem;font-weight:700;color:var(--text-muted);letter-spacing:.5px;text-transform:uppercase;font-family:'DM Sans',sans-serif;transition:all var(--tr);position:relative}
+.tab-btn::after{content:'';position:absolute;bottom:0;left:15%;right:15%;height:2px;background:linear-gradient(90deg,var(--primary-l),var(--accent));border-radius:2px 2px 0 0;transform:scaleX(0);transition:transform .3s}
+.tab-btn.active{color:var(--text)}
+.tab-btn.active::after{transform:scaleX(1)}
+.tab-btn:hover:not(.active){color:var(--text);background:rgba(255,255,255,.02)}
+
+/* TAB CONTENT */
+.tab-content{display:none;padding:20px 18px;animation:fadeUp .22s ease}
+.tab-content.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* SECTION TITLE */
+.sec-title{font-family:'Rajdhani',sans-serif;font-size:.67rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:11px;padding-bottom:7px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px}
+.sec-title::before{content:'';width:3px;height:12px;background:linear-gradient(to bottom,var(--primary-l),var(--accent));border-radius:3px}
+
+/* GRID */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:13px}
+.g-span2{grid-column:span 2}
+
+/* FIELDS */
+.field{display:flex;flex-direction:column;gap:4px}
+label.lbl{font-size:.63rem;font-weight:600;color:var(--text-muted);letter-spacing:.5px;text-transform:uppercase}
+.inp-wrap{position:relative}
+.inp-ico{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:.85rem;pointer-events:none;line-height:1}
+input,select,textarea{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 10px 9px 32px;border-radius:var(--radius-sm);font-size:.84rem;font-family:'DM Sans',sans-serif;transition:border-color var(--tr),box-shadow var(--tr),background var(--tr);appearance:none;-webkit-appearance:none}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--border-focus);box-shadow:0 0 0 3px var(--primary-glow);background:var(--surface3)}
+input.rdonly{background:var(--surface);color:var(--text-muted);cursor:default}
+textarea{padding-left:12px;resize:vertical;min-height:68px}
+
+/* CHIPS */
+.chip-row{display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap}
+.chip{padding:8px 12px;border-radius:var(--radius-sm);cursor:pointer;border:1.5px solid var(--border);background:var(--surface2);font-size:.75rem;font-weight:700;color:var(--text-muted);font-family:'Rajdhani',sans-serif;letter-spacing:.5px;transition:all .2s;text-align:center;user-select:none}
+.chip:hover{border-color:rgba(129,140,248,.4);background:var(--surface3)}
+.chip.selected{border-color:var(--primary-l);background:var(--primary-glow);color:var(--text);box-shadow:0 0 0 1px var(--primary-l)}
+.chip.chip-tech{flex:1;padding:10px 6px}
+.chip.chip-tech .chip-icon{font-size:1.4rem;display:block;margin-bottom:4px}
+.chip.chip-tech .chip-label{font-size:.68rem}
+.chip.chip-fps{min-width:52px}
+.chip.chip-fonte{min-width:48px}
+.chip.chip-fonte.selected{border-color:var(--accent);background:var(--accent-glow);color:var(--accent)}
+
+/* QUALITY BADGE */
+.quality-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:.72rem;font-weight:700;margin-top:8px;margin-bottom:4px}
+.qb-excellent{background:var(--success-bg);color:#34d399;border:1px solid rgba(34,197,94,.25)}
+.qb-good     {background:var(--info-bg);   color:#818cf8;border:1px solid rgba(129,140,248,.25)}
+.qb-medium   {background:var(--warn-bg);   color:#fbbf24;border:1px solid rgba(245,158,11,.25)}
+.qb-basic    {background:var(--danger-bg); color:#f87171;border:1px solid rgba(239,68,68,.25)}
+
+/* RESULT CARD */
+.res-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px;margin-bottom:14px}
+.res-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:.81rem;border-bottom:1px solid var(--border)}
+.res-row:last-child{border-bottom:none}
+.res-lbl{color:var(--text-muted)}
+.res-val{font-weight:700;font-size:.87rem;font-family:'Rajdhani',sans-serif;letter-spacing:.5px;color:#818cf8}
+.res-val.g{color:#34d399}.res-val.o{color:var(--accent)}.res-val.r{color:#f87171}
+.res-val.m{color:var(--text-muted);font-size:.77rem;font-family:'DM Sans',sans-serif;font-weight:500;letter-spacing:0}
+
+/* BANDA ALERT */
+.banda-alert{display:flex;align-items:flex-start;gap:9px;padding:10px 13px;border-radius:var(--radius-sm);margin-bottom:14px;font-size:.8rem;line-height:1.4}
+.banda-alert.ok  {background:var(--success-bg);border:1px solid rgba(34,197,94,.25);color:#34d399}
+.banda-alert.warn{background:var(--warn-bg);   border:1px solid rgba(245,158,11,.3);color:#fbbf24}
+.banda-alert.bad {background:var(--danger-bg); border:1px solid rgba(239,68,68,.3); color:#f87171}
+.banda-alert.none{display:none}
+
+/* TOGGLE */
+.toggle-row{display:flex;align-items:center;gap:12px;background:var(--surface2);border:1px solid var(--border);padding:10px 12px;border-radius:var(--radius-sm);margin-bottom:12px;cursor:pointer}
+.toggle-lbl{font-size:.8rem;color:var(--text-muted);flex:1}
+.sw{position:relative;width:36px;height:20px;flex-shrink:0}
+.sw input{opacity:0;width:0;height:0;position:absolute}
+.sw-slider{position:absolute;inset:0;background:var(--surface3);border:1px solid var(--border);border-radius:20px;cursor:pointer;transition:.3s}
+.sw-slider::before{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:var(--text-dim);top:2px;left:2px;transition:.3s}
+.sw input:checked+.sw-slider{background:var(--primary-l);border-color:var(--primary-l)}
+.sw input:checked+.sw-slider::before{transform:translateX(16px);background:#fff}
+
+/* BUTTONS */
+.btn-row{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+.btn{flex:1;border:none;padding:11px 8px;border-radius:var(--radius-sm);cursor:pointer;font-size:.68rem;font-weight:700;letter-spacing:.5px;display:flex;align-items:center;justify-content:center;gap:6px;font-family:'DM Sans',sans-serif;transition:all var(--tr);text-transform:uppercase;min-width:70px}
+.btn:hover{transform:translateY(-1px);filter:brightness(1.1)}
+.btn:active{transform:translateY(0)}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-l));color:#fff;box-shadow:0 4px 20px var(--primary-glow)}
+.btn-dark{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-new{background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;box-shadow:0 4px 16px rgba(22,163,74,.3)}
+.btn-print{background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;box-shadow:0 4px 16px rgba(124,58,237,.3)}
+.btn-sm{flex:none;padding:5px 9px;font-size:.63rem;border-radius:var(--radius-xs);font-weight:700;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:4px;transition:all var(--tr)}
+.btn-edit   {background:var(--primary-glow);color:#818cf8;border:1px solid rgba(129,140,248,.2)}
+.btn-edit:hover{background:rgba(129,140,248,.2)}
+.btn-pdf-sm {background:rgba(249,115,22,.12);color:var(--accent);border:1px solid rgba(249,115,22,.25)}
+.btn-pdf-sm:hover{background:rgba(249,115,22,.22)}
+.btn-del    {background:var(--danger-bg);color:var(--danger);border:1px solid rgba(239,68,68,.2)}
+.btn-del:hover{background:rgba(239,68,68,.22)}
+.btn-copy   {background:var(--success-bg);color:var(--success);border:1px solid rgba(34,197,94,.25);padding:6px 12px;font-size:.68rem}
+.btn-copy:hover{background:rgba(34,197,94,.22)}
+
+/* DATA TOOLS */
+.data-tools{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.data-tool-btn{flex:1;padding:10px;border-radius:var(--radius-sm);cursor:pointer;border:1px solid var(--border);background:var(--surface2);font-size:.72rem;font-weight:700;color:var(--text-muted);font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:7px;transition:all var(--tr)}
+.data-tool-btn:hover{border-color:var(--primary-l);color:var(--text);background:var(--surface3)}
+#importFileInput{display:none}
+
+/* CHECKLIST */
+.checklist-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cl-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;display:flex;align-items:flex-start;gap:10px;margin-bottom:6px;transition:all .2s}
+.cl-item:hover{border-color:rgba(129,140,248,.2)}
+.cl-check{width:18px;height:18px;border-radius:5px;min-width:18px;margin-top:1px;border:2px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:.7rem}
+.cl-check.checked{background:var(--primary-l);border-color:var(--primary-l);color:#fff}
+.cl-body{flex:1;min-width:0}
+.cl-name{font-size:.83rem;font-weight:500}
+.cl-name.done{color:var(--text-dim);text-decoration:line-through}
+.cl-note{font-size:.67rem;color:var(--text-dim);margin-top:3px;line-height:1.4}
+.cl-note.warn{color:var(--warn)}.cl-note.info{color:#818cf8}.cl-note.danger{color:#f87171}
+.cl-qty-wrap{display:flex;align-items:center;gap:4px;flex-shrink:0;margin-top:1px}
+.cl-qty-label{font-size:.66rem;color:var(--text-dim)}
+.cl-qty{width:54px;padding:4px 6px;font-size:.82rem;font-weight:700;font-family:'Rajdhani',sans-serif;text-align:center;background:var(--surface3);border:1px solid var(--border);color:var(--text);border-radius:5px}
+.cl-qty:focus{outline:none;border-color:var(--border-focus)}
+.cl-field-only{background:var(--warn-bg);border-color:rgba(245,158,11,.22)}
+.cl-field-only .cl-name{color:var(--warn)}
+
+/* STATS BAR */
+.stats-bar{display:flex;gap:8px;margin-bottom:13px}
+.stat-pill{flex:1;text-align:center;padding:8px 4px;border-radius:8px;font-size:.68rem;font-weight:700;border:1px solid var(--border);background:var(--surface2)}
+.stat-pill span{display:block;font-family:'Rajdhani',sans-serif;font-size:1.3rem;font-weight:700;line-height:1}
+.stat-pill.s-orc{color:#fbbf24}.stat-pill.s-aprov{color:#34d399}.stat-pill.s-inst{color:#818cf8}
+
+/* HISTORY */
+.search-wrap{position:relative;margin-bottom:11px}
+.search-wrap .inp-ico{top:50%}
+.hist-list{display:flex;flex-direction:column;gap:7px}
+.hist-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 13px;animation:fadeUp .2s ease;transition:border-color var(--tr)}
+.hist-item:hover{border-color:rgba(129,140,248,.25)}
+.hist-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:6px}
+.hist-body{flex:1;min-width:0}
+.hist-id{font-size:.59rem;color:var(--text-dim);font-family:'Rajdhani',sans-serif;letter-spacing:1.5px}
+.hist-name{font-size:.9rem;font-weight:600;margin:2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-meta{font-size:.69rem;color:var(--text-muted)}
+.hist-badge{font-size:.59rem;font-weight:700;padding:3px 8px;border-radius:20px;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;flex-shrink:0}
+.b-orc  {background:rgba(245,158,11,.12);color:#fbbf24;border:1px solid rgba(245,158,11,.25)}
+.b-aprov{background:rgba(34,197,94,.12); color:#34d399;border:1px solid rgba(34,197,94,.25)}
+.b-inst {background:rgba(129,140,248,.12);color:#818cf8;border:1px solid rgba(129,140,248,.25)}
+.hist-expire{font-size:.63rem;font-weight:600;padding:2px 7px;border-radius:20px;margin-left:5px}
+.exp-ok  {background:var(--success-bg);color:#34d399}
+.exp-warn{background:var(--warn-bg);color:#fbbf24}
+.exp-red {background:var(--danger-bg);color:#f87171}
+.exp-done{background:var(--surface3);color:var(--text-dim)}
+.hist-actions{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}
+.hist-empty{text-align:center;color:var(--text-muted);font-size:.85rem;padding:40px 0}
+
+/* FOOTER */
+footer{text-align:center;padding:18px 10px 6px;font-size:.7rem;color:var(--text-muted);line-height:1.9}
+footer strong{color:var(--text);display:block;margin-bottom:2px}
+footer a{color:#818cf8;text-decoration:none;font-weight:600;transition:color var(--tr)}
+footer a:hover{color:var(--accent)}
+.footer-sep{margin:0 8px;opacity:.3}
+
+/* PRINT STYLES */
+@media print{
+  body{background:#fff!important;padding:0;color:#000}
+  .header,.tabs,.btn-row,.banda-alert,.quality-badge,footer,#pwaBar,.data-tools{display:none!important}
+  .card{box-shadow:none;border:none}
+  .tab-content{display:block!important;animation:none}
+  #gestao,.tab-content#checklist,.tab-content#eletrica{display:none!important}
+  .res-card{border:1px solid #ddd;break-inside:avoid}
+  .res-val{color:#040798!important}
+  .sec-title{color:#333;border-bottom:1px solid #ccc}
+  input,select,textarea{border:1px solid #ddd!important;background:#fff!important;color:#000!important}
+  .chip.selected{background:#e8eaf6!important;color:#040798!important;border-color:#040798!important}
+  .inp-ico{display:none}
+  input,select{padding-left:10px!important}
+}
+
+@media(max-width:500px){
+  .grid{grid-template-columns:1fr}
+  .g-span2{grid-column:span 1}
+  .btn-row{flex-direction:column}
+  .header-text h1{font-size:1.3rem}
+  .chip-row{gap:5px}
+  .tabs .tab-btn{font-size:.55rem;padding:12px 2px}
+}
+</style>
 </head>
 <body>
+<div id="toast"></div>
+
+<!-- PWA INSTALL BANNER -->
+<div id="pwaBar">
+  <p>📲 Instalar Fênix Hub<span>Adicionar à tela inicial para uso offline</span></p>
+  <button class="pwa-btn pwa-install" onclick="instalarPWA()">Instalar</button>
+  <button class="pwa-btn pwa-dismiss" onclick="fecharPWA()">Agora não</button>
+</div>
 
 <div class="container">
-    <div class="version">V.2.4</div>
-    
-    <div class="header-brand">
+  <div class="header">
+    <div class="header-left">
+      <div class="logo-icon">🔥</div>
+      <div class="header-text">
         <h1>FÊNIX SOLUÇÕES</h1>
-        <p>Protegendo Pessoas e Patrimônios</p>
+        <p id="headerSlogan">Protegendo Pessoas e Patrimônios</p>
+      </div>
     </div>
+    <div class="header-right">
+      <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="Alternar tema">🌙</button>
+      <button class="icon-btn" onclick="imprimirProjeto()" title="Imprimir projeto">🖨️</button>
+      <div class="version-badge">V.6.0</div>
+    </div>
+  </div>
 
+  <div class="card">
     <div class="tabs">
-        <button class="tab-btn active" onclick="openTab(event, 'dados')">📁 PROJETO</button>
-        <button class="tab-btn" onclick="openTab(event, 'eletrica')">⚡ ENERGIA & CUSTOS</button>
-        <button class="tab-btn" onclick="openTab(event, 'gestao')">📜 HISTÓRICO</button>
+      <button class="tab-btn active" onclick="openTab(event,'dados')">📁 Projeto</button>
+      <button class="tab-btn"        onclick="openTab(event,'eletrica')">⚡ Energia</button>
+      <button class="tab-btn"        onclick="openTab(event,'checklist')">✅ Checklist</button>
+      <button class="tab-btn"        onclick="openTab(event,'gestao')">📜 Histórico</button>
     </div>
 
+    <!-- ======================================================== ABA PROJETO -->
     <div id="dados" class="tab-content active">
-        <div class="grid">
-            <div class="input-group"><label>🏢 Empresa Prestadora</label><div class="input-icon"><span>🏭</span><input type="text" id="empresa" value="Fênix Soluções Tecnológicas"></div></div>
-            <div class="input-group"><label>👷 Técnico Responsável</label><div class="input-icon"><span>👤</span><input type="text" id="tecnico" value="Cristiano Fênix"></div></div>
+      <p class="sec-title">Empresa Prestadora</p>
+      <div class="grid" style="margin-bottom:14px">
+        <div class="field">
+          <label class="lbl">🏭 Nome da Empresa</label>
+          <div class="inp-wrap"><span class="inp-ico">🏭</span>
+            <input type="text" id="empresa" placeholder="Nome da empresa" oninput="atualizarSlogan()">
+          </div>
         </div>
-        <div class="input-group" style="margin-bottom:10px;"><label>🤝 Nome do Cliente</label><div class="input-icon"><span>🏢</span><input type="text" id="cliente" placeholder="Ex: Marco Aurelio"></div></div>
-        
-        <div class="grid">
-            <div class="input-group"><label>📅 Data de Emissão</label><div class="input-icon"><span>📅</span><input type="text" id="dataEmissao" readonly style="background:#f1f5f9"></div></div>
-            <div class="input-group"><label>⏳ Validade (Dias)</label><div class="input-icon"><span>⏱️</span><input type="number" id="validade" value="10" oninput="calcular()"></div></div>
-            <div class="input-group"><label>📹 Nº Câmeras</label><div class="input-icon"><span>🔢</span><input type="number" id="cameras" value="10" oninput="calcular()"></div></div>
-            <div class="input-group"><label>🎬 Resolução</label><div class="input-icon"><span>📺</span><select id="resolucao" onchange="calcular()"><option value="2">1080p</option><option value="4">4MP</option><option value="8">4K</option></select></div></div>
-            <div class="input-group"><label>⏳ Dias Retenção</label><div class="input-icon"><span>📅</span><input type="number" id="dias" value="7" oninput="calcular()"></div></div>
-            <div class="input-group"><label>🛡️ Reserva Técnica</label><div class="input-icon"><span>🛡️</span><select id="reserva" onchange="calcular()"><option value="1.1">10%</option><option value="1.2">20%</option><option value="1.3" selected>30%</option></select></div></div>
+        <div class="field">
+          <label class="lbl">👤 Técnico Responsável</label>
+          <div class="inp-wrap"><span class="inp-ico">👤</span>
+            <input type="text" id="tecnico" placeholder="Nome do técnico">
+          </div>
         </div>
+      </div>
 
-        <div class="card-res">
-            <div class="line"><span>Internet (Upload):</span> <span class="val" id="bandaReal">0 Mbps</span></div>
-            <div class="line"><span>HD Sugerido:</span> <span class="val" id="hdSugerido">---</span></div>
-            <div class="line" style="color: var(--danger);"><strong>Consumo Período:</strong> <span id="storageTotal" class="val" style="color: var(--danger);">0 TB</span></div>
+      <p class="sec-title">Dados do Cliente</p>
+      <div class="grid" style="margin-bottom:14px">
+        <div class="field g-span2">
+          <label class="lbl">🤝 Nome do Cliente</label>
+          <div class="inp-wrap"><span class="inp-ico">🤝</span>
+            <input type="text" id="cliente" placeholder="Ex: Marco Aurelio">
+          </div>
         </div>
-        <input type="hidden" id="codigo">
-        <button class="btn btn-save" onclick="salvar()">💾 Salvar no Sistema (LocalHost)</button>
-        <button class="btn btn-pdf" onclick="gerarPDF()">📄 Gerar PDF Profissional</button>
+        <div class="field">
+          <label class="lbl">📍 Endereço / Local</label>
+          <div class="inp-wrap"><span class="inp-ico">📍</span>
+            <input type="text" id="endereco" placeholder="Rua, Nº, Bairro">
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl">📱 Telefone</label>
+          <div class="inp-wrap"><span class="inp-ico">📱</span>
+            <input type="text" id="telefone" placeholder="(79) 9 9999-0000">
+          </div>
+        </div>
+        <div class="field g-span2">
+          <label class="lbl">✉️ E-mail</label>
+          <div class="inp-wrap"><span class="inp-ico">✉️</span>
+            <input type="email" id="email" placeholder="cliente@email.com">
+          </div>
+        </div>
+      </div>
+
+      <p class="sec-title">Parâmetros Técnicos</p>
+      <label class="lbl" style="margin-bottom:8px;display:block">📡 Tecnologia das Câmeras</label>
+      <div class="chip-row" id="techSelector">
+        <div class="chip chip-tech" data-tech="ip"      onclick="selectTech('ip')">
+          <span class="chip-icon">🌐</span><span class="chip-label">IP</span>
+        </div>
+        <div class="chip chip-tech" data-tech="wifi"    onclick="selectTech('wifi')">
+          <span class="chip-icon">📶</span><span class="chip-label">Wi-Fi</span>
+        </div>
+        <div class="chip chip-tech" data-tech="multihd" onclick="selectTech('multihd')">
+          <span class="chip-icon">📡</span><span class="chip-label">MultiHD</span>
+        </div>
+      </div>
+
+      <div class="grid" style="margin-bottom:14px">
+        <div class="field">
+          <label class="lbl">📅 Data de Emissão</label>
+          <div class="inp-wrap"><span class="inp-ico">📅</span>
+            <input type="text" id="dataEmissao" class="rdonly" readonly>
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl">⏱️ Validade (Dias)</label>
+          <div class="inp-wrap"><span class="inp-ico">⏱️</span>
+            <input type="number" id="validade" placeholder="Ex: 10" oninput="calcular()">
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl">📹 Nº de Câmeras</label>
+          <div class="inp-wrap"><span class="inp-ico">📹</span>
+            <input type="number" id="cameras" placeholder="Ex: 10" min="1" oninput="calcular();gerarChecklist()">
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl">📺 Resolução</label>
+          <div class="inp-wrap"><span class="inp-ico">📺</span>
+            <select id="resolucao" onchange="calcular()">
+              <option value="">Selecione...</option>
+              <option value="720p">720p HD</option>
+              <option value="1080p">1080p Full HD</option>
+              <option value="4mp">4MP</option>
+              <option value="4k">4K Ultra HD</option>
+            </select>
+          </div>
+        </div>
+        <div class="field g-span2">
+          <label class="lbl" style="margin-bottom:7px">🎞️ FPS (Quadros por Segundo)</label>
+          <div class="chip-row" id="fpsSelector" style="margin-bottom:0">
+            <div class="chip chip-fps" data-fps="6"  onclick="selectFPS('6')"> 6 fps</div>
+            <div class="chip chip-fps" data-fps="10" onclick="selectFPS('10')">10 fps</div>
+            <div class="chip chip-fps" data-fps="15" onclick="selectFPS('15')">15 fps</div>
+            <div class="chip chip-fps" data-fps="25" onclick="selectFPS('25')">25 fps</div>
+            <div class="chip chip-fps" data-fps="30" onclick="selectFPS('30')">30 fps</div>
+          </div>
+          <div id="qualityBadge"></div>
+        </div>
+        <div class="field">
+          <label class="lbl">🗜️ Compressão de Vídeo</label>
+          <div class="inp-wrap"><span class="inp-ico">🗜️</span>
+            <select id="compressao" onchange="calcular()">
+              <option value="">Selecione...</option>
+              <option value="H264">H.264</option>
+              <option value="H265">H.265</option>
+              <option value="H265+">H.265+</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl">📅 Dias de Retenção</label>
+          <div class="inp-wrap"><span class="inp-ico">📅</span>
+            <input type="number" id="dias" placeholder="Ex: 7" min="1" oninput="calcular()">
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl">🛡️ Reserva Técnica</label>
+          <div class="inp-wrap"><span class="inp-ico">🛡️</span>
+            <select id="reserva" onchange="calcular();gerarChecklist()">
+              <option value="">Selecione...</option>
+              <option value="1.1">10%</option>
+              <option value="1.2">20%</option>
+              <option value="1.3">30%</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl">🌐 Banda Disponível do Cliente (Mbps)</label>
+          <div class="inp-wrap"><span class="inp-ico">🌐</span>
+            <input type="number" id="bandaCliente" placeholder="Ex: 50" step="0.1" oninput="calcular()">
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl">🚦 Status do Projeto</label>
+          <div class="inp-wrap"><span class="inp-ico">🚦</span>
+            <select id="statusProjeto">
+              <option value="projeto">Projeto</option>
+              <option value="aprovado">Aprovado</option>
+              <option value="instalado">Instalado</option>
+            </select>
+          </div>
+        </div>
+        <div class="field g-span2">
+          <label class="lbl">📝 Obs. Gerais</label>
+          <div class="inp-wrap"><span class="inp-ico" style="top:12px">📝</span>
+            <textarea id="obsGeral" placeholder="Anotações gerais sobre o projeto..." style="min-height:58px;padding-top:8px"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div id="bandaAlert" class="banda-alert none"></div>
+
+      <div class="res-card">
+        <div class="res-row"><span class="res-lbl">📦 Armazenamento / Dia</span>       <span class="res-val o" id="storageDay">—</span></div>
+        <div class="res-row"><span class="res-lbl">📦 Armazenamento Total (Período)</span><span class="res-val o" id="storageTotal">—</span></div>
+        <div class="res-row"><span class="res-lbl">💾 HD Sugerido</span>                <span class="res-val g" id="hdSugerido">—</span></div>
+        <div class="res-row"><span class="res-lbl">🌐 Banda Necessária</span>            <span class="res-val"   id="bandaReal">—</span></div>
+        <div class="res-row"><span class="res-lbl">🌐 Banda Recomendada (+40%)</span>    <span class="res-val g" id="bandaRecomendada">—</span></div>
+        <div class="res-row"><span class="res-lbl">🗜️ Compressão / FPS</span>           <span class="res-val"   id="compressaoLabel">—</span></div>
+        <div class="res-row"><span class="res-lbl">🔢 Código do Projeto</span>           <span class="res-val m" id="codigoDisplay">Será gerado ao salvar</span></div>
+      </div>
+
+      <input type="hidden" id="codigo">
+      <div class="btn-row">
+        <button class="btn btn-new"     onclick="novoOrcamento()">✨ Novo</button>
+        <button class="btn btn-primary" onclick="salvar()">💾 Salvar</button>
+        <button class="btn btn-dark"    onclick="gerarPDF()">📄 PDF</button>
+        <button class="btn btn-print"   onclick="imprimirProjeto()">🖨️ Imprimir</button>
+      </div>
     </div>
 
+    <!-- ======================================================== ABA ENERGIA -->
     <div id="eletrica" class="tab-content">
-        <div class="switch-container">
-            <input type="checkbox" id="chkShowCusto" checked onchange="calcular()">
-            <label>Incluir custos financeiros no PDF?</label>
+      <p class="sec-title">Parâmetros Elétricos</p>
+      <label class="toggle-row" for="chkShowCusto">
+        <span class="toggle-lbl">Incluir custos financeiros no PDF?</span>
+        <span class="sw"><input type="checkbox" id="chkShowCusto" checked onchange="calcular()"><span class="sw-slider"></span></span>
+      </label>
+      <div class="grid" style="margin-bottom:14px">
+        <div class="field">
+          <label class="lbl">🔋 Consumo Câmera (mA)</label>
+          <div class="inp-wrap"><span class="inp-ico">🔋</span>
+            <input type="number" id="consumoC" value="200" oninput="calcular()">
+          </div>
         </div>
-        <div class="grid">
-            <div class="input-group"><label>🔌 Consumo Câmera (mA)</label><div class="input-icon"><span>🔋</span><input type="number" id="consumoC" value="250" oninput="calcular()"></div></div>
-            <div class="input-group"><label>📟 Watts DVR (Fonte Própria)</label><div class="input-icon"><span>💡</span><input type="number" id="wDvr" value="20" oninput="calcular()"></div></div>
-            <div class="input-group" style="grid-column: span 2;"><label>💰 Tarifa KWh (R$)</label><div class="input-icon"><span>💵</span><input type="number" id="tarifa" value="0.95" step="0.01" oninput="calcular()"></div></div>
+        <div class="field">
+          <label class="lbl">💡 Watts DVR/NVR</label>
+          <div class="inp-wrap"><span class="inp-ico">💡</span>
+            <input type="number" id="wDvr" value="20" oninput="calcular()">
+          </div>
         </div>
-        <div class="card-res">
-            <div class="line"><strong>FONTE P/ CÂMERAS:</strong> <span class="val" id="ampFinal" style="color:var(--success)">---</span></div>
-            <div class="line"><span>Consumo Elétrico:</span> <span class="val" id="kwhMes">0 KWh/mês</span></div>
-            <div id="rowCustoFin" class="line" style="border-top:1px solid #ddd; padding-top:5px; margin-top:5px;">
-                <strong>CUSTO MENSAL:</strong> <span class="val" id="custoMoeda" style="color:var(--success)">R$ 0,00</span>
-            </div>
+        <div class="field g-span2">
+          <label class="lbl">💵 Tarifa KWh (R$)</label>
+          <div class="inp-wrap"><span class="inp-ico">💵</span>
+            <input type="number" id="tarifa" value="0.95" step="0.01" oninput="calcular()">
+          </div>
         </div>
-        <textarea id="obsEnergia" placeholder="Dica técnica sobre o consumo..."></textarea>
+      </div>
+
+      <p class="sec-title">Fonte de Alimentação (Câmeras)</p>
+      <div class="field" style="margin-bottom:14px">
+        <label class="lbl" style="margin-bottom:7px">⚡ Amperagem da Fonte</label>
+        <div class="chip-row" id="fonteSelector" style="margin-bottom:0">
+          <div class="chip chip-fonte" data-amp="1"  onclick="selectFonte('1')"> 1A</div>
+          <div class="chip chip-fonte" data-amp="3"  onclick="selectFonte('3')"> 3A</div>
+          <div class="chip chip-fonte" data-amp="5"  onclick="selectFonte('5')"> 5A</div>
+          <div class="chip chip-fonte" data-amp="10" onclick="selectFonte('10')">10A</div>
+          <div class="chip chip-fonte" data-amp="15" onclick="selectFonte('15')">15A</div>
+          <div class="chip chip-fonte" data-amp="20" onclick="selectFonte('20')">20A</div>
+        </div>
+        <div id="fonteDica" style="font-size:.68rem;margin-top:6px;font-style:italic"></div>
+      </div>
+
+      <p class="sec-title">Resultados Elétricos</p>
+      <div class="res-card">
+        <div class="res-row"><span class="res-lbl">⚡ Corrente Total Câmeras</span><span class="res-val g" id="ampFinal">—</span></div>
+        <div class="res-row"><span class="res-lbl">⚡ Fonte Selecionada</span>      <span class="res-val o" id="fonteLabel">Nenhuma selecionada</span></div>
+        <div class="res-row"><span class="res-lbl">🔌 Consumo Elétrico</span>       <span class="res-val"   id="kwhMes">—</span></div>
+        <div class="res-row" id="rowCustoFin">
+          <span class="res-lbl">💰 Custo Mensal Estimado</span>
+          <span class="res-val o" id="custoMoeda">R$ 0,00</span>
+        </div>
+      </div>
+      <div class="field">
+        <label class="lbl">🔧 Observações Técnicas de Energia</label>
+        <textarea id="obsEnergia" placeholder="Ex: Recomenda-se nobreak para maior estabilidade..."></textarea>
+      </div>
     </div>
 
+    <!-- ======================================================== ABA CHECKLIST -->
+    <div id="checklist" class="tab-content">
+      <div class="checklist-header">
+        <p class="sec-title" style="margin-bottom:0">Materiais para Instalação</p>
+        <button class="btn-copy btn-sm" onclick="copiarChecklist()">📋 Copiar</button>
+      </div>
+      <div id="clTechBadge" style="margin-bottom:12px"></div>
+      <div id="checklistItems"></div>
+      <div id="clEmpty" style="text-align:center;color:var(--text-muted);font-size:.85rem;padding:30px 0;display:none">
+        📋 Defina tecnologia e número de câmeras na aba <strong>Projeto</strong>.
+      </div>
+    </div>
+
+    <!-- ======================================================== ABA HISTÓRICO -->
     <div id="gestao" class="tab-content">
-        <input type="text" id="busca" placeholder="Filtrar registros..." oninput="listar()">
-        <div id="historico" style="margin-top:10px;"></div>
-    </div>
+      <p class="sec-title">Projetos Arquivados</p>
 
-    <footer>
-        Desenvolvido por &copy; Fênix Soluções Tecnológicas<br>
-        (79) 9 9968-0880 | @fenixsolucoestecnologicas
-    </footer>
+      <!-- Exportar / Importar -->
+      <div class="data-tools">
+        <button class="data-tool-btn" onclick="exportarDados()">📤 Exportar Backup</button>
+        <button class="data-tool-btn" onclick="document.getElementById('importFileInput').click()">📥 Importar Backup</button>
+        <input type="file" id="importFileInput" accept=".json" onchange="importarDados(event)">
+      </div>
+
+      <div class="stats-bar">
+        <div class="stat-pill s-orc">  <span id="cntOrc">0</span>Projeto</div>
+        <div class="stat-pill s-aprov"><span id="cntAprov">0</span>Aprovado</div>
+        <div class="stat-pill s-inst"> <span id="cntInst">0</span>Instalado</div>
+      </div>
+      <div class="search-wrap">
+        <span class="inp-ico">🔍</span>
+        <input type="text" id="busca" placeholder="Filtrar por nome, código, status..." oninput="listar()">
+      </div>
+      <div class="hist-list" id="historico"></div>
+    </div>
+  </div>
+
+  <footer>
+    <strong>© 2026 — Desenvolvido por Fênix Soluções Tecnológicas</strong>
+    <div>
+      <a href="https://wa.me/5579999680880" target="_blank">📱 (79) 9 9968-0880</a>
+      <span class="footer-sep">|</span>
+      <a href="https://instagram.com/fenixsolucoestecnologicas" target="_blank">📸 @fenixsolucoestecnologicas</a>
+    </div>
+  </footer>
 </div>
 
 <script>
-    function openTab(evt, tabName) {
-        let content = document.getElementsByClassName("tab-content");
-        for (let i = 0; i < content.length; i++) content[i].style.display = "none";
-        let tabs = document.getElementsByClassName("tab-btn");
-        for (let i = 0; i < tabs.length; i++) tabs[i].className = tabs[i].className.replace(" active", "");
-        document.getElementById(tabName).style.display = "block";
-        evt.currentTarget.className += " active";
+/* ============================================================ CONSTANTES */
+const WA_LINK       = "https://wa.me/5579999680880";
+const IG_LINK       = "https://instagram.com/fenixsolucoestecnologicas";
+const WA_TEXT       = "(79) 9 9968-0880";
+const IG_TEXT       = "@fenixsolucoestecnologicas";
+const DB_KEY        = 'fenix_v60';
+const FENIX_EMPRESA = 'fênix soluções tecnológicas';
+
+const BADGE_MAP  = { projeto:'b-orc', aprovado:'b-aprov', instalado:'b-inst' };
+const LABEL_MAP  = { projeto:'Projeto', aprovado:'Aprovado', instalado:'Instalado' };
+const TECH_MAP   = { ip:'CFTV IP', wifi:'Wi-Fi', multihd:'CFTV MultiHD' };
+const TECH_ICON  = { ip:'🌐', wifi:'📶', multihd:'📡' };
+const BITRATE_BASE = { '720p':1.5, '1080p':3.5, '4mp':5.0, '4k':10.0 };
+const COMP_FACTOR  = { 'H264':1.0, 'H265':0.5, 'H265+':0.4 };
+const FPS_FACTOR   = { '6':0.2, '10':0.33, '15':0.5, '25':0.83, '30':1.0 };
+const COMP_LABEL   = { 'H264':'H.264', 'H265':'H.265', 'H265+':'H.265+' };
+
+let selectedTech   = '';
+let selectedFPS    = '';
+let selectedFonte  = '';
+let isDirty        = false;
+let checklistState = {};
+let deferredPWA    = null;
+
+/* ============================================================ PWA */
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPWA = e;
+  if (!localStorage.getItem('fenix_pwa_dismissed')) {
+    document.getElementById('pwaBar').classList.add('show');
+  }
+});
+function instalarPWA() {
+  if (!deferredPWA) return;
+  deferredPWA.prompt();
+  deferredPWA.userChoice.then(() => {
+    deferredPWA = null;
+    fecharPWA();
+  });
+}
+function fecharPWA() {
+  document.getElementById('pwaBar').classList.remove('show');
+  localStorage.setItem('fenix_pwa_dismissed', '1');
+}
+
+// Gera manifest.json dinamicamente e registra service worker inline
+function setupPWA() {
+  const manifest = {
+    name: 'Fênix Hub de Projetos',
+    short_name: 'Fênix Hub',
+    description: 'Fênix Soluções — Hub de Projetos CFTV',
+    start_url: './',
+    display: 'standalone',
+    background_color: '#080918',
+    theme_color: '#040798',
+    icons: [
+      { src: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%23040798"/><text y=".9em" font-size="80">🔥</text></svg>', sizes: '192x192', type: 'image/svg+xml' },
+      { src: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%23040798"/><text y=".9em" font-size="80">🔥</text></svg>', sizes: '512x512', type: 'image/svg+xml' }
+    ]
+  };
+  const blob = new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'});
+  const url  = URL.createObjectURL(blob);
+  document.getElementById('manifestLink').setAttribute('href', url);
+  document.getElementById('manifestLink').setAttribute('rel', 'manifest');
+}
+
+/* ============================================================ IMPRIMIR */
+function imprimirProjeto() {
+  // Garante que a aba projeto está ativa
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('dados').classList.add('active');
+  setTimeout(() => window.print(), 100);
+}
+
+/* ============================================================ EXPORTAR / IMPORTAR */
+function exportarDados() {
+  const db = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
+  if (!db.length) { toast('📭 Nenhum projeto para exportar.', 'error'); return; }
+  const payload = { version: 'fenix_v60', exportedAt: new Date().toISOString(), count: db.length, projects: db };
+  const blob    = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url     = URL.createObjectURL(blob);
+  const a       = document.createElement('a');
+  a.href        = url;
+  a.download    = `fenix_backup_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast(`📤 Backup exportado — ${db.length} projeto(s).`, 'success');
+}
+
+function importarDados(evt) {
+  const file = evt.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      const projects = data.projects || (Array.isArray(data) ? data : null);
+      if (!projects) { toast('❌ Arquivo inválido.', 'error'); return; }
+      const db     = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
+      let merged   = 0, updated = 0;
+      projects.forEach(p => {
+        const idx = db.findIndex(x => x.id === p.id);
+        if (idx >= 0) { db[idx] = p; updated++; } else { db.push(p); merged++; }
+      });
+      localStorage.setItem(DB_KEY, JSON.stringify(db));
+      listar();
+      toast(`📥 Importado: ${merged} novo(s), ${updated} atualizado(s).`, 'success');
+    } catch { toast('❌ Erro ao ler o arquivo.', 'error'); }
+  };
+  reader.readAsText(file);
+  evt.target.value = '';
+}
+
+/* ============================================================ SLOGAN */
+function atualizarSlogan() {
+  const v  = (document.getElementById('empresa').value || '').trim().toLowerCase();
+  const el = document.getElementById('headerSlogan');
+  el.textContent = (v === FENIX_EMPRESA || v === '') ? 'Protegendo Pessoas e Patrimônios' : '';
+}
+
+/* ============================================================ TEMA */
+function toggleTheme() {
+  const h = document.documentElement, d = h.getAttribute('data-theme') === 'dark';
+  h.setAttribute('data-theme', d ? 'light' : 'dark');
+  document.getElementById('themeBtn').textContent = d ? '☀️' : '🌙';
+  localStorage.setItem('fenix_theme', d ? 'light' : 'dark');
+}
+function loadTheme() {
+  const t = localStorage.getItem('fenix_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('themeBtn').textContent = t === 'dark' ? '🌙' : '☀️';
+}
+
+/* ============================================================ TOAST */
+function toast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `t-${type} show`;
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+/* ============================================================ TABS */
+function openTab(evt, name) {
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(name).classList.add('active');
+  evt.currentTarget.classList.add('active');
+  if (name === 'gestao')    listar();
+  if (name === 'checklist') gerarChecklist();
+}
+
+/* ============================================================ SELETORES */
+function selectTech(tech) {
+  selectedTech = tech;
+  document.querySelectorAll('.chip-tech').forEach(el => el.classList.toggle('selected', el.dataset.tech === tech));
+  gerarChecklist(); isDirty = true;
+}
+function selectFPS(fps) {
+  selectedFPS = fps;
+  document.querySelectorAll('.chip-fps').forEach(el => el.classList.toggle('selected', el.dataset.fps === fps));
+  const res = document.getElementById('resolucao').value;
+  const qi  = getQualityInfo(fps, res);
+  document.getElementById('qualityBadge').innerHTML = fps
+    ? `<div class="quality-badge ${qi.cls}">${qi.icon} ${qi.label}</div>` : '';
+  calcular(); isDirty = true;
+}
+function selectFonte(amp) {
+  selectedFonte = amp;
+  document.querySelectorAll('.chip-fonte').forEach(el => el.classList.toggle('selected', el.dataset.amp === amp));
+  document.getElementById('fonteLabel').textContent = amp + 'A (Multi-saída / Colmeia)';
+  const corrente = calcCorrenteCams();
+  const dica     = document.getElementById('fonteDica');
+  if (corrente > 0) {
+    const margem = parseFloat(amp) - corrente;
+    if (margem < 0) {
+      dica.style.color = 'var(--danger)';
+      dica.innerHTML   = `❌ Fonte insuficiente! Corrente necessária: ~${corrente.toFixed(1)}A`;
+    } else if (margem < corrente * 0.15) {
+      dica.style.color = 'var(--warn)';
+      dica.innerHTML   = `⚠️ Margem estreita. Considere uma fonte maior.`;
+    } else {
+      dica.style.color = 'var(--success)';
+      dica.innerHTML   = `✅ Adequada. Margem disponível: ~${margem.toFixed(1)}A`;
     }
+  } else { dica.innerHTML = ''; }
+  isDirty = true;
+}
+function calcCorrenteCams() {
+  const qtd   = parseFloat(document.getElementById('cameras').value)  || 0;
+  const consC = parseFloat(document.getElementById('consumoC').value) || 200;
+  return (qtd * consC) / 1000;
+}
 
-    function calcular() {
-        const qtd = parseFloat(document.getElementById('cameras').value) || 0;
-        const res = parseFloat(document.getElementById('resolucao').value);
-        const dias = parseFloat(document.getElementById('dias').value) || 0;
-        const reserva = parseFloat(document.getElementById('reserva').value);
-        const consC = parseFloat(document.getElementById('consumoC').value) || 0;
-        const wDvr = parseFloat(document.getElementById('wDvr').value) || 0;
-        const tarifa = parseFloat(document.getElementById('tarifa').value) || 0;
+/* ============================================================ QUALITY */
+function getQualityInfo(fps, res) {
+  const f = parseInt(fps) || 0;
+  const resScore = { '720p':1, '1080p':2, '4mp':3, '4k':4 }[res] || 0;
+  if (f >= 25 && resScore >= 3) return { cls:'qb-excellent', label:'Excelente — Ideal para reconhecimento facial e identificação detalhada', icon:'🏆' };
+  if (f >= 15 && resScore >= 2) return { cls:'qb-good',      label:'Boa — Adequada para monitoramento geral com boa definição',           icon:'✅' };
+  if (f >= 10 && resScore >= 1) return { cls:'qb-medium',    label:'Média — Suficiente para monitoramento de áreas e presença',           icon:'⚠️' };
+  return                               { cls:'qb-basic',     label:'Básica — Recomendado aumentar FPS ou resolução',                      icon:'❗' };
+}
 
-        let banda = (qtd * (res * 0.8) * 0.5) * reserva;
-        let storageTB = ((qtd * (res * 0.8) * 0.5 * 86400) / 8 / 1048576) * dias;
-        document.getElementById('bandaReal').innerText = banda.toFixed(1) + " Mbps";
-        document.getElementById('storageTotal').innerText = storageTB.toFixed(2) + " TB";
-        
-        const hds = [1, 2, 4, 6, 8, 10, 12, 16];
-        let sug = hds.find(h => h >= (storageTB * reserva));
-        document.getElementById('hdSugerido').innerText = (sug ? sug + " TB" : "Especial") + " (Surveillance)";
+/* ============================================================ CÓDIGO */
+function gerarCodigo() {
+  return `FNX-${new Date().getFullYear()}-${String(Date.now()).slice(-5)}`;
+}
 
-        let ampCams = (qtd * consC) / 1000;
-        document.getElementById('ampFinal').innerText = Math.ceil(ampCams * reserva) + " Amperes";
-        
-        let wattsTot = (ampCams * 12) + wDvr;
-        let kwh = (wattsTot * 24 * 30) / 1000;
-        let custo = kwh * tarifa;
+/* ============================================================ CALCULAR */
+function calcular() {
+  const qtd      = parseFloat(document.getElementById('cameras').value)    || 0;
+  const resKey   = document.getElementById('resolucao').value;
+  const compKey  = document.getElementById('compressao').value;
+  const dias     = parseFloat(document.getElementById('dias').value)        || 0;
+  const reserva  = parseFloat(document.getElementById('reserva').value)     || 1.3;
+  const consC    = parseFloat(document.getElementById('consumoC').value)    || 200;
+  const wDvr     = parseFloat(document.getElementById('wDvr').value)        || 20;
+  const tarifa   = parseFloat(document.getElementById('tarifa').value)      || 0.95;
+  const bandaCli = parseFloat(document.getElementById('bandaCliente').value)|| 0;
+  const fpsKey   = selectedFPS;
 
-        document.getElementById('kwhMes').innerText = kwh.toFixed(1) + " KWh/mês";
-        document.getElementById('custoMoeda').innerText = "R$ " + custo.toLocaleString('pt-BR', {minimumFractionDigits: 2});
-        document.getElementById('rowCustoFin').style.display = document.getElementById('chkShowCusto').checked ? "flex" : "none";
+  if (fpsKey && resKey) {
+    const qi = getQualityInfo(fpsKey, resKey);
+    document.getElementById('qualityBadge').innerHTML =
+      `<div class="quality-badge ${qi.cls}">${qi.icon} ${qi.label}</div>`;
+  }
 
-        if(!document.getElementById('codigo').value) document.getElementById('codigo').value = Math.floor(Math.random()*900000+100000);
+  document.getElementById('compressaoLabel').textContent =
+    (compKey || fpsKey) ? `${COMP_LABEL[compKey] || '—'} / ${fpsKey || '—'} fps` : '—';
+
+  if (!qtd || !resKey || !compKey || !fpsKey) {
+    ['storageDay','storageTotal','hdSugerido','bandaReal','bandaRecomendada','ampFinal','kwhMes']
+      .forEach(id => { document.getElementById(id).textContent = '—'; });
+    document.getElementById('bandaAlert').className = 'banda-alert none';
+    return;
+  }
+
+  const bitrateRef   = BITRATE_BASE[resKey] || 3.5;
+  const fpsFator     = FPS_FACTOR[fpsKey]   || 0.5;
+  const compFator    = COMP_FACTOR[compKey] || 1.0;
+  const bitrateCam   = bitrateRef * fpsFator * compFator;
+  const bitrateTotal = bitrateCam * qtd;
+
+  const storageDayGB   = (bitrateTotal * 3600 * 24) / 8 / 1024;
+  const storageTotalTB = (storageDayGB * dias) / 1024;
+  const hdMin          = storageTotalTB * reserva;
+  const hds            = [1,2,4,6,8,10,12,16,20];
+  const sug            = hds.find(h => h >= hdMin);
+
+  const bandaNecessaria  = bitrateTotal;
+  const bandaRecomendada = bandaNecessaria * 1.4;
+
+  document.getElementById('storageDay').textContent       = storageDayGB.toFixed(1) + ' GB/dia';
+  document.getElementById('storageTotal').textContent     = storageTotalTB >= 1
+    ? storageTotalTB.toFixed(2) + ' TB'
+    : (storageTotalTB * 1024).toFixed(0) + ' GB';
+  document.getElementById('hdSugerido').textContent       = (sug ? sug + ' TB' : 'Especial') + ' (Surveillance)';
+  document.getElementById('bandaReal').textContent        = bandaNecessaria.toFixed(1) + ' Mbps';
+  document.getElementById('bandaRecomendada').textContent = bandaRecomendada.toFixed(1) + ' Mbps';
+
+  const ampCams  = (qtd * consC) / 1000;
+  const wattsTot = (ampCams * 12) + wDvr;
+  const kwh      = (wattsTot * 24 * 30) / 1000;
+  const custo    = kwh * tarifa;
+  document.getElementById('ampFinal').textContent   = ampCams.toFixed(2) + ' A (total câmeras)';
+  document.getElementById('kwhMes').textContent     = kwh.toFixed(1) + ' KWh/mês';
+  document.getElementById('custoMoeda').textContent = 'R$ ' + custo.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+  document.getElementById('rowCustoFin').style.display =
+    document.getElementById('chkShowCusto').checked ? 'flex' : 'none';
+
+  const alertEl = document.getElementById('bandaAlert');
+  if (bandaCli > 0) {
+    if (bandaCli >= bandaRecomendada) {
+      alertEl.className = 'banda-alert ok';
+      alertEl.innerHTML = `✅ <span>Banda disponível (${bandaCli} Mbps) <strong>suficiente</strong> e dentro da recomendação (${bandaRecomendada.toFixed(1)} Mbps).</span>`;
+    } else if (bandaCli >= bandaNecessaria) {
+      alertEl.className = 'banda-alert warn';
+      alertEl.innerHTML = `⚠️ <span>Banda disponível (${bandaCli} Mbps) atende o mínimo (${bandaNecessaria.toFixed(1)} Mbps) mas está <strong>abaixo da recomendada</strong> (${bandaRecomendada.toFixed(1)} Mbps).</span>`;
+    } else {
+      alertEl.className = 'banda-alert bad';
+      alertEl.innerHTML = `❌ <span>Banda disponível (${bandaCli} Mbps) <strong>insuficiente</strong>! Mínimo: ${bandaNecessaria.toFixed(1)} Mbps · Recomendado: ${bandaRecomendada.toFixed(1)} Mbps.</span>`;
     }
+  } else { alertEl.className = 'banda-alert none'; }
 
-    function salvar() {
-        let db = JSON.parse(localStorage.getItem('fenix_v24') || "[]");
-        db.push({
-            id: document.getElementById('codigo').value,
-            cliente: document.getElementById('cliente').value || "Avulso",
-            data: document.getElementById('dataEmissao').value,
-            hd: document.getElementById('hdSugerido').innerText
-        });
-        localStorage.setItem('fenix_v24', JSON.stringify(db));
-        alert("✔️ Projeto arquivado com sucesso!");
-        listar();
+  if (selectedFonte) selectFonte(selectedFonte);
+  isDirty = true;
+}
+
+/* ============================================================ CHECKLIST DEF */
+function getChecklistDef(tech, n, reserva) {
+  const R = reserva || 1.3;
+  const pct = Math.round((R - 1) * 100);
+  const all = [
+    { id:'gravador',      ordem:1,  icon:'🖥️', tech:'*',
+      name: tech==='ip' ? 'NVR (Gravador de Vídeo em Rede)' : 'DVR (Gravador de Vídeo Digital)',
+      qtyFn:()=>1, unit:'unid.',
+      notes:[{text:tech==='ip'?'NVR com portas PoE suficientes para o número de câmeras':'DVR compatível com tecnologia MultiHD/Analógica',type:'info'}], fi:false},
+    { id:'hd',            ordem:2,  icon:'💾', tech:'*',
+      name:'HD Surveillance (conforme dimensionamento)',
+      qtyFn:()=>1, unit:'unid.',
+      notes:[{text:'Consulte a aba Projeto para o tamanho recomendado',type:'info'}], fi:false},
+    { id:'nobreak',       ordem:3,  icon:'🔋', tech:'*',
+      name:'Nobreak / UPS',
+      qtyFn:()=>1, unit:'unid.',
+      notes:[{text:'Garante funcionamento contínuo em quedas de energia',type:'warn'}], fi:false},
+    { id:'switch_poe',    ordem:4,  icon:'🔌', tech:['ip'],
+      name:'Switch PoE',
+      qtyFn:()=>1, unit:'unid.',
+      notes:[{text:`Mínimo ${n+1} portas (${n} câmeras + 1 uplink para o NVR)`,type:'info'}], fi:false},
+    { id:'fonte_12v',     ordem:5,  icon:'⚡', tech:['multihd','wifi'],
+      name:'Fonte de Alimentação 12V (Multi-saída / Colmeia)',
+      qtyFn:()=>1, unit:'unid.',
+      notes:[{text:'Sempre 1 fonte multi-saída (colmeia). Amperagens: 1A/3A/5A/10A/15A/20A — selecione na aba Energia',type:'info'}], fi:false},
+    { id:'rack',          ordem:6,  icon:'🗄️', tech:'*',
+      name: tech==='ip' ? 'Rack de Telecomunicações' : 'Gabinete Metálico para DVR',
+      qtyFn:()=>1, unit:'unid.', notes:[], fi:false},
+    { id:'parafuso_rack', ordem:7,  icon:'🔩', tech:'*',
+      name:'Parafusos 8mm + Buchas (Rack/Gabinete)',
+      qtyFn:()=>4, unit:'unid.', notes:[], fi:false},
+    { id:'cameras_item',  ordem:8,  icon:'📷', tech:'*',
+      name: tech==='ip' ? 'Câmera IP' : tech==='wifi' ? 'Câmera Wi-Fi' : 'Câmera MultiHD',
+      qtyFn:(n)=>n, unit:'unid.', notes:[], fi:false},
+    { id:'vbox',          ordem:9,  icon:'📦', tech:'*',
+      name:'Caixa de Proteção VBox / Suporte para Câmera',
+      qtyFn:(n)=>n, unit:'unid.',
+      notes:[{text:'1 por câmera — cada VBox utiliza 4 parafusos 6mm com bucha',type:null}], fi:false},
+    { id:'parafuso_vbox', ordem:10, icon:'🔩', tech:'*',
+      name:'Parafusos 6mm + Buchas (Fixação VBox)',
+      qtyFn:(n)=>Math.ceil(n*4*R), unit:'unid.',
+      notes:[{text:`4 por câmera com reserva de ${pct}%`,type:null}], fi:false},
+    { id:'parafuso_cam',  ordem:11, icon:'🔩', tech:'*',
+      name:'Parafusos (Fixação da Câmera no Suporte)',
+      qtyFn:(n)=>Math.ceil(n*3*R), unit:'unid.',
+      notes:[{text:`3 por câmera com reserva de ${pct}%`,type:null}], fi:false},
+    { id:'rj45',          ordem:12, icon:'🔌', tech:['ip'],
+      name:'Conector RJ45',
+      qtyFn:(n)=>Math.ceil(n*2*R), unit:'unid.',
+      notes:[{text:`2 por câmera com reserva de ${pct}%`,type:null}], fi:false},
+    { id:'bnc',           ordem:13, icon:'🔌', tech:['multihd'],
+      name:'Conector BNC',
+      qtyFn:(n)=>Math.ceil(n*2*R), unit:'unid.',
+      notes:[{text:`2 por câmera com reserva de ${pct}%`,type:null},{text:'⚠️ Utilizar BNC OU Balun — nunca os dois simultaneamente',type:'danger'}], fi:false},
+    { id:'balun',         ordem:14, icon:'🔌', tech:['multihd'],
+      name:'Conector Balun (par)',
+      qtyFn:(n)=>Math.ceil(n*R), unit:'pares',
+      notes:[{text:`1 par por câmera com reserva de ${pct}%`,type:null},{text:'⚠️ Utilizar Balun OU BNC — nunca os dois simultaneamente',type:'danger'}], fi:false},
+    { id:'p4',            ordem:15, icon:'🔌', tech:['multihd','wifi'],
+      name:'Conector P4 (Alimentação)',
+      qtyFn:(n)=>Math.ceil(n*1*R), unit:'unid.',
+      notes:[{text:`1 por câmera com reserva de ${pct}%`,type:null}], fi:false},
+    { id:'patchcord',     ordem:16, icon:'🟡', tech:['ip'],
+      name:'Patch Cord RJ45 (Switch → NVR / Roteador)',
+      qtyFn:()=>2, unit:'unid.',
+      notes:[{text:'Para conexão do Switch ao NVR e ao roteador',type:'info'}], fi:false},
+    { id:'cabo_coaxial',  ordem:17, icon:'〰️', tech:['multihd'],
+      name:'Cabo Coaxial RG59 / RG6 / RG11 — A definir',
+      qtyFn:()=>null, unit:'metros',
+      notes:[
+        {text:'Metragem a definir após vistoria in loco',type:'warn'},
+        {text:'Utilizar quando conectores BNC forem adotados',type:'info'}
+      ], fi:true},
+    { id:'cabo_utp',      ordem:18, icon:'〰️', tech:['multihd','ip'],
+      name: tech==='ip' ? 'Cabo UTP CAT 5e / CAT 6 — A definir' : 'Cabo UTP CAT 5e / CAT 6 — A definir',
+      qtyFn:()=>null, unit:'metros',
+      notes:[
+        {text:'Metragem a definir após vistoria in loco',type:'warn'},
+        {text: tech==='multihd' ? 'Utilizar quando conectores Balun forem adotados' : 'Cabo padrão para câmeras IP com Switch PoE',type:'info'}
+      ], fi:true},
+    { id:'eletroduto',    ordem:19, icon:'⬜', tech:'*',
+      name:'Eletrodutos ou Canaletas — A definir',
+      qtyFn:()=>null, unit:'m/unid.',
+      notes:[{text:'Quantidade a ser definida após estudo técnico in loco',type:'warn'}], fi:true},
+    { id:'tape',          ordem:20, icon:'🩹', tech:'*',
+      name:'Tape Autofusão + Fita Isolante',
+      qtyFn:()=>2, unit:'rolos',
+      notes:[{text:'Proteção de conectores expostos',type:null}], fi:false},
+    { id:'abracadeiras',  ordem:21, icon:'🔗', tech:'*',
+      name:'Abraçadeiras de Nylon',
+      qtyFn:(n)=>n*5, unit:'unid.',
+      notes:[{text:'Aprox. 5 por ponto de câmera',type:null}], fi:false},
+    { id:'etiquetas',     ordem:22, icon:'🏷️', tech:'*',
+      name:'Etiquetas de Identificação de Cabos',
+      qtyFn:(n)=>Math.ceil(n*2*R), unit:'unid.',
+      notes:[{text:`2 por câmera (1 em cada extremidade) com reserva de ${pct}%`,type:null}], fi:false},
+  ];
+  return all
+    .filter(i => i.tech === '*' || i.tech.includes(tech))
+    .sort((a, b) => a.ordem - b.ordem);
+}
+
+/* ============================================================ CHECKLIST DOM */
+function gerarChecklist() {
+  const n       = parseInt(document.getElementById('cameras').value)   || 0;
+  const reserva = parseFloat(document.getElementById('reserva').value) || 1.3;
+  const wrap    = document.getElementById('checklistItems');
+  const empty   = document.getElementById('clEmpty');
+  const badge   = document.getElementById('clTechBadge');
+
+  if (!selectedTech || !n) { wrap.innerHTML = ''; empty.style.display = 'block'; badge.innerHTML = ''; return; }
+  empty.style.display = 'none';
+
+  const tc = { ip:'#818cf8', wifi:'#34d399', multihd:'#f97316' };
+  badge.innerHTML = `<span style="display:inline-flex;align-items:center;gap:7px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 13px;font-size:.75rem;font-weight:700;color:${tc[selectedTech]}">${TECH_ICON[selectedTech]} ${TECH_MAP[selectedTech]} · ${n} câmera${n>1?'s':''} · Reserva: ${Math.round((reserva-1)*100)}%</span>`;
+
+  const items = getChecklistDef(selectedTech, n, reserva);
+  items.forEach(item => {
+    const calcQty = item.qtyFn ? item.qtyFn(n) : null;
+    if (!checklistState[item.id]) checklistState[item.id] = { qty: calcQty, checked: false };
+    else if (calcQty !== null)    checklistState[item.id].qty = calcQty;
+  });
+
+  wrap.innerHTML = items.map(item => {
+    const st  = checklistState[item.id];
+    const qty = st.qty; const chk = st.checked;
+    const qtyInput = qty !== null
+      ? `<span class="cl-qty-label">Qtd:</span><input class="cl-qty" type="number" min="1" value="${qty}" onchange="updateQty('${item.id}',this.value)">`
+      : `<span class="cl-qty-label" style="color:var(--warn);font-size:.63rem">A definir</span>`;
+    const notesHTML = (item.notes || []).map(n =>
+      `<div class="cl-note ${n.type || ''}">${n.text}</div>`
+    ).join('');
+    return `<div class="cl-item ${item.fi?'cl-field-only':''}" id="cli_${item.id}">
+      <div class="cl-check ${chk?'checked':''}" onclick="toggleCheck('${item.id}')" id="chk_${item.id}">${chk?'✓':''}</div>
+      <div class="cl-body">
+        <div class="cl-name ${chk?'done':''}" id="clname_${item.id}">${item.icon} ${item.name}</div>
+        ${notesHTML}
+      </div>
+      <div class="cl-qty-wrap">${qtyInput}<span class="cl-qty-label" style="margin-left:2px">${item.unit}</span></div>
+    </div>`;
+  }).join('');
+}
+
+function toggleCheck(id) {
+  checklistState[id].checked = !checklistState[id].checked;
+  const chk = checklistState[id].checked;
+  document.getElementById(`chk_${id}`).classList.toggle('checked', chk);
+  document.getElementById(`chk_${id}`).textContent = chk ? '✓' : '';
+  document.getElementById(`clname_${id}`).classList.toggle('done', chk);
+}
+function updateQty(id, val) { checklistState[id].qty = parseInt(val) || 1; }
+
+/* ============================================================ COPIAR CHECKLIST */
+function copiarChecklist() {
+  const n       = parseInt(document.getElementById('cameras').value)   || 0;
+  const reserva = parseFloat(document.getElementById('reserva').value) || 1.3;
+  if (!selectedTech || !n) { toast('⚠️ Gere o checklist primeiro.', 'error'); return; }
+  const items = getChecklistDef(selectedTech, n, reserva);
+  const cli   = document.getElementById('cliente').value || 'Cliente';
+  const cod   = document.getElementById('codigo').value  || '—';
+  let txt  = `✅ CHECKLIST DE MATERIAIS — FÊNIX SOLUÇÕES\n`;
+  txt += `Projeto: ${cod} | Cliente: ${cli}\n`;
+  txt += `Tecnologia: ${TECH_MAP[selectedTech]} | Câmeras: ${n} | Reserva: ${Math.round((reserva-1)*100)}%\n`;
+  txt += '─'.repeat(48) + '\n\n';
+  items.forEach(item => {
+    const st  = checklistState[item.id] || {};
+    const qty = (st.qty !== null && st.qty !== undefined) ? st.qty : '(a definir)';
+    txt += `${st.checked ? '✅' : '⬜'} ${item.icon} ${item.name}\n`;
+    txt += `   Qtd: ${qty} ${item.unit}\n`;
+    (item.notes || []).forEach(n => { txt += `   ℹ️ ${n.text}\n`; });
+    txt += '\n';
+  });
+  txt += '─'.repeat(48) + '\n';
+  txt += '⚠️ Cabos, eletrodutos e canaletas: metragem a definir após vistoria in loco.\n\n';
+  txt += `© 2026 Fênix Soluções Tecnológicas\n📱 ${WA_TEXT} | 📸 ${IG_TEXT}`;
+  navigator.clipboard.writeText(txt)
+    .then(() => toast('📋 Checklist copiado!', 'success'))
+    .catch(() => toast('❌ Não foi possível copiar.', 'error'));
+}
+
+/* ============================================================ NOVO PROJETO */
+function novoOrcamento() {
+  if (isDirty && document.getElementById('codigo').value) {
+    if (!confirm('Há alterações não salvas. Deseja iniciar um novo projeto?')) return;
+  }
+  ['cliente','endereco','telefone','email','obsGeral','obsEnergia','cameras','validade','dias','bandaCliente']
+    .forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('consumoC').value = '200';
+  document.getElementById('wDvr').value     = '20';
+  document.getElementById('tarifa').value   = '0.95';
+  ['resolucao','compressao','reserva'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('statusProjeto').value  = 'projeto';
+  document.getElementById('chkShowCusto').checked = true;
+  selectedTech = ''; selectedFPS = ''; selectedFonte = '';
+  document.querySelectorAll('.chip-tech,.chip-fps,.chip-fonte').forEach(el => el.classList.remove('selected'));
+  document.getElementById('qualityBadge').innerHTML = '';
+  document.getElementById('fonteDica').innerHTML    = '';
+  document.getElementById('fonteLabel').textContent = 'Nenhuma selecionada';
+  document.getElementById('bandaAlert').className   = 'banda-alert none';
+  checklistState = {};
+  const cod = gerarCodigo();
+  document.getElementById('codigo').value        = cod;
+  document.getElementById('codigoDisplay').textContent = cod;
+  document.getElementById('dataEmissao').value   = new Date().toLocaleDateString('pt-BR');
+  ['storageDay','storageTotal','hdSugerido','bandaReal','bandaRecomendada','ampFinal','kwhMes','compressaoLabel']
+    .forEach(id => { document.getElementById(id).textContent = '—'; });
+  document.getElementById('custoMoeda').textContent = 'R$ 0,00';
+  document.getElementById('checklistItems').innerHTML = '';
+  document.getElementById('clEmpty').style.display   = 'none';
+  document.getElementById('clTechBadge').innerHTML   = '';
+  isDirty = false;
+  document.querySelectorAll('.tab-btn')[0].click();
+  document.getElementById('cliente').focus();
+  toast('✨ Novo projeto iniciado!', 'info');
+}
+
+/* ============================================================ VALIDAR */
+function validar() {
+  if (!document.getElementById('cliente').value.trim()) {
+    toast('⚠️ Informe o nome do cliente!', 'error'); return false;
+  }
+  return true;
+}
+
+/* ============================================================ COLETAR */
+function coletarDados() {
+  return {
+    id:           document.getElementById('codigo').value,
+    cliente:      document.getElementById('cliente').value.trim(),
+    endereco:     document.getElementById('endereco').value.trim(),
+    telefone:     document.getElementById('telefone').value.trim(),
+    email:        document.getElementById('email').value.trim(),
+    empresa:      document.getElementById('empresa').value.trim(),
+    tecnico:      document.getElementById('tecnico').value.trim(),
+    status:       document.getElementById('statusProjeto').value,
+    data:         document.getElementById('dataEmissao').value,
+    validade:     document.getElementById('validade').value,
+    cameras:      document.getElementById('cameras').value,
+    resolucao:    document.getElementById('resolucao').value,
+    compressao:   document.getElementById('compressao').value,
+    fps:          selectedFPS,
+    dias:         document.getElementById('dias').value,
+    reserva:      document.getElementById('reserva').value,
+    bandaCliente: document.getElementById('bandaCliente').value,
+    consumoC:     document.getElementById('consumoC').value,
+    wDvr:         document.getElementById('wDvr').value,
+    tarifa:       document.getElementById('tarifa').value,
+    showCusto:    document.getElementById('chkShowCusto').checked,
+    obsGeral:     document.getElementById('obsGeral').value.trim(),
+    obsEnergia:   document.getElementById('obsEnergia').value.trim(),
+    tech:         selectedTech,
+    fonte:        selectedFonte,
+    checklistState: JSON.parse(JSON.stringify(checklistState)),
+    storageDay:   document.getElementById('storageDay').textContent,
+    storageTotal: document.getElementById('storageTotal').textContent,
+    hd:           document.getElementById('hdSugerido').textContent,
+    banda:        document.getElementById('bandaReal').textContent,
+    bandaRec:     document.getElementById('bandaRecomendada').textContent,
+    compLabel:    document.getElementById('compressaoLabel').textContent,
+    amp:          document.getElementById('ampFinal').textContent,
+    kwh:          document.getElementById('kwhMes').textContent,
+    custo:        document.getElementById('custoMoeda').textContent,
+  };
+}
+
+/* ============================================================ SALVAR */
+function salvar() {
+  if (!validar()) return;
+  if (!document.getElementById('codigo').value) {
+    const cod = gerarCodigo();
+    document.getElementById('codigo').value        = cod;
+    document.getElementById('codigoDisplay').textContent = cod;
+  }
+  const db    = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
+  const entry = coletarDados();
+  const idx   = db.findIndex(x => x.id === entry.id);
+  if (idx >= 0) db[idx] = entry; else db.push(entry);
+  localStorage.setItem(DB_KEY, JSON.stringify(db));
+  isDirty = false;
+  toast('✅ Projeto salvo com sucesso!', 'success');
+}
+
+/* ============================================================ CARREGAR */
+function carregar(id) {
+  if (isDirty && document.getElementById('codigo').value && document.getElementById('codigo').value !== id) {
+    if (!confirm('Há alterações não salvas. Deseja carregar outro projeto?')) return;
+  }
+  const db = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
+  const e  = db.find(x => x.id === id);
+  if (!e) return;
+  document.getElementById('codigo').value        = e.id;
+  document.getElementById('codigoDisplay').textContent = e.id;
+  ['cliente','endereco','telefone','email','empresa','tecnico','validade',
+   'cameras','dias','bandaCliente','obsGeral','obsEnergia'].forEach(f => {
+    document.getElementById(f).value = e[f] || '';
+  });
+  document.getElementById('dataEmissao').value    = e.data       || '';
+  document.getElementById('resolucao').value      = e.resolucao  || '';
+  document.getElementById('compressao').value     = e.compressao || '';
+  document.getElementById('reserva').value        = e.reserva    || '';
+  document.getElementById('statusProjeto').value  = e.status     || 'projeto';
+  document.getElementById('consumoC').value       = e.consumoC   || '200';
+  document.getElementById('wDvr').value           = e.wDvr       || '20';
+  document.getElementById('tarifa').value         = e.tarifa     || '0.95';
+  document.getElementById('chkShowCusto').checked = e.showCusto !== false;
+  selectedTech = e.tech || ''; selectedFonte = e.fonte || ''; selectedFPS = e.fps || '';
+  document.querySelectorAll('.chip-tech') .forEach(el => el.classList.toggle('selected', el.dataset.tech === selectedTech));
+  document.querySelectorAll('.chip-fps')  .forEach(el => el.classList.toggle('selected', el.dataset.fps  === selectedFPS));
+  document.querySelectorAll('.chip-fonte').forEach(el => el.classList.toggle('selected', el.dataset.amp  === selectedFonte));
+  document.getElementById('fonteLabel').textContent = selectedFonte ? selectedFonte + 'A (Multi-saída / Colmeia)' : 'Nenhuma selecionada';
+  checklistState = e.checklistState ? JSON.parse(JSON.stringify(e.checklistState)) : {};
+  atualizarSlogan(); calcular(); isDirty = false;
+  document.querySelectorAll('.tab-btn')[0].click();
+  toast(`📂 Projeto de ${e.cliente} carregado!`, 'info');
+}
+
+/* ============================================================ DELETAR */
+function deletar(id) {
+  if (!confirm('Remover este projeto permanentemente?')) return;
+  let db = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
+  db = db.filter(x => x.id !== id);
+  localStorage.setItem(DB_KEY, JSON.stringify(db));
+  if (document.getElementById('codigo').value === id) {
+    document.getElementById('codigo').value = '';
+    document.getElementById('codigoDisplay').textContent = 'Será gerado ao salvar';
+  }
+  listar(); toast('🗑️ Projeto removido.', 'info');
+}
+
+/* ============================================================ LISTAR */
+function listar() {
+  const db    = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
+  const query = document.getElementById('busca').value.toLowerCase();
+  const list  = document.getElementById('historico');
+  const hoje  = new Date(); hoje.setHours(0,0,0,0);
+  let cO=0,cA=0,cI=0;
+  db.forEach(i => {
+    if (i.status==='projeto'||i.status==='orcamento') cO++;
+    else if (i.status==='aprovado') cA++;
+    else if (i.status==='instalado') cI++;
+  });
+  document.getElementById('cntOrc').textContent   = cO;
+  document.getElementById('cntAprov').textContent = cA;
+  document.getElementById('cntInst').textContent  = cI;
+  const filtrado = [...db].reverse().filter(i =>
+    (i.cliente||'').toLowerCase().includes(query) ||
+    (i.id||'').toLowerCase().includes(query) ||
+    (i.status||'').toLowerCase().includes(query) ||
+    (i.email||'').toLowerCase().includes(query) ||
+    (i.telefone||'').toLowerCase().includes(query)
+  );
+  if (!filtrado.length) { list.innerHTML = '<div class="hist-empty">📂 Nenhum projeto encontrado.</div>'; return; }
+  list.innerHTML = filtrado.map(i => {
+    let exp = '';
+    const sk = i.status === 'orcamento' ? 'projeto' : i.status;
+    if (i.status !== 'instalado') {
+      try {
+        const p = i.data.split('/');
+        const em = new Date(p[2], p[1]-1, p[0]); em.setHours(0,0,0,0);
+        const venc = new Date(em.getTime() + (parseInt(i.validade)||10)*86400000);
+        const diff = Math.round((venc - hoje) / 86400000);
+        if (diff < 0)       exp = `<span class="hist-expire exp-red">Vencido há ${Math.abs(diff)}d</span>`;
+        else if (diff <= 3) exp = `<span class="hist-expire exp-warn">Vence em ${diff}d</span>`;
+        else                exp = `<span class="hist-expire exp-ok">Válido: ${diff}d</span>`;
+      } catch(e) {}
+    } else { exp = '<span class="hist-expire exp-done">Concluído</span>'; }
+    const tt  = i.tech ? `<span style="font-size:.6rem;color:var(--text-dim);margin-left:4px">${TECH_ICON[i.tech]||''} ${TECH_MAP[i.tech]||''}</span>` : '';
+    const can = i.status !== 'instalado';
+    const eb  = can
+      ? `<button class="btn-sm btn-edit"    onclick="carregar('${i.id}')">✏️ Editar</button>`
+      : `<button class="btn-sm btn-edit"    onclick="carregar('${i.id}')">👁️ Ver</button>`;
+    const meta = [i.data, i.endereco, i.telefone, i.email].filter(Boolean).join(' · ');
+    return `<div class="hist-item">
+      <div class="hist-top">
+        <div class="hist-body">
+          <div class="hist-id">${i.id}</div>
+          <div class="hist-name">${i.cliente}${tt}</div>
+          <div class="hist-meta">${meta||'—'}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0">
+          <span class="hist-badge ${BADGE_MAP[sk]||'b-orc'}">${LABEL_MAP[sk]||'Projeto'}</span>
+          ${exp}
+        </div>
+      </div>
+      <div class="hist-actions">
+        ${eb}
+        <button class="btn-sm btn-pdf-sm" onclick="gerarPDFDe('${i.id}')">📄 PDF</button>
+        <button class="btn-sm btn-del"    onclick="deletar('${i.id}')">🗑️ Excluir</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ============================================================ PDF */
+function gerarPDFDe(id) {
+  const db = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
+  const e  = db.find(x => x.id === id);
+  if (e) _buildPDF(e);
+}
+function gerarPDF() {
+  if (!validar()) return;
+  if (!document.getElementById('codigo').value) { toast('⚠️ Salve antes de gerar o PDF.', 'error'); return; }
+  _buildPDF(coletarDados());
+}
+
+function _buildPDF(d) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const statusLabel = LABEL_MAP[d.status === 'orcamento' ? 'projeto' : d.status] || 'Projeto';
+  const techLabel   = TECH_MAP[d.tech]  || 'Não definida';
+  const compLabel   = d.compressao ? COMP_LABEL[d.compressao] || d.compressao : '—';
+  const fileName    = `${d.id}_${(d.cliente||'cliente').replace(/\s+/g,'_')}.pdf`;
+  const reserva     = parseFloat(d.reserva) || 1.3;
+  const isFenix     = (d.empresa||'').trim().toLowerCase() === FENIX_EMPRESA;
+
+  // HEADER
+  doc.setFillColor(4,7,152); doc.rect(0,0,210,40,'F');
+  doc.setFontSize(20); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+  doc.text((d.empresa||'Fênix Soluções').toUpperCase(), 105, isFenix?14:18, null, null, 'center');
+  doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(170,178,255);
+  if (isFenix) doc.text('PROTEGENDO PESSOAS E PATRIMÔNIOS', 105, 22, null, null, 'center');
+  doc.text('ESTUDO TÉCNICO DE INFRAESTRUTURA E VIABILIDADE', 105, isFenix?29:26, null, null, 'center');
+
+  // FAIXA CÓDIGO
+  doc.setFillColor(240,243,255); doc.rect(0,40,210,11,'F');
+  doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(4,7,152);
+  doc.text(`PROJETO: ${d.id}`, 14, 47.5);
+  doc.text(`STATUS: ${statusLabel}  |  ${TECH_ICON[d.tech]||''} ${techLabel}  |  ${compLabel} / ${d.fps||'—'} fps`, 196, 47.5, null, null, 'right');
+
+  let y = 60;
+
+  const secTitle = title => {
+    doc.setFillColor(235,238,255); doc.rect(14,y-2,182,9,'F');
+    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(4,7,152);
+    doc.text(title, 16, y+4.5); y += 13;
+    doc.setFont('helvetica','normal'); doc.setTextColor(51,65,85);
+  };
+  const row = (label, value, color) => {
+    if (!value || value === '—') return;
+    doc.setFontSize(9);
+    doc.setFont('helvetica','normal'); doc.setTextColor(100,116,139);
+    doc.text(label, 18, y);
+    doc.setFont('helvetica','bold'); doc.setTextColor(...(color||[30,41,59]));
+    doc.text(String(value), 196, y, null, null, 'right');
+    y += 7;
+  };
+  const divider = () => {
+    doc.setDrawColor(210,215,235); doc.setLineWidth(0.3);
+    doc.line(14,y,196,y); y += 7;
+  };
+
+  secTitle('▶  DADOS DO PROJETO');
+  row('Cliente:', d.cliente);
+  if (d.endereco) row('Endereço:', d.endereco);
+  if (d.telefone) row('Telefone:', d.telefone);
+  if (d.email)    row('E-mail:', d.email);
+  row('Técnico:', d.tecnico);
+  row('Emissão:', `${d.data}   |   Validade: ${d.validade} dias`);
+  row('Tecnologia:', `${techLabel}  |  ${compLabel}  |  ${d.fps||'—'} fps`);
+  y += 2; divider();
+
+  secTitle('▶  DIMENSIONAMENTO DE ARMAZENAMENTO');
+  row('Armazenamento / Dia:', d.storageDay, [234,88,12]);
+  row('Armazenamento Total (Período):', d.storageTotal, [234,88,12]);
+  row('HD Recomendado:', d.hd, [22,163,74]);
+  y += 2; divider();
+
+  secTitle('▶  DIMENSIONAMENTO DE REDE');
+  row('Banda Necessária:', d.banda);
+  row('Banda Recomendada (+40% margem):', d.bandaRec, [22,163,74]);
+  if (d.bandaCliente) {
+    const bn  = parseFloat(d.banda)    || 0;
+    const br  = parseFloat(d.bandaRec) || 0;
+    const bc  = parseFloat(d.bandaCliente) || 0;
+    const cor = bc>=br ? [22,163,74] : bc>=bn ? [234,88,12] : [220,38,38];
+    const st  = bc>=br ? 'SUFICIENTE ✓' : bc>=bn ? 'ATENÇÃO — abaixo do recomendado' : 'INSUFICIENTE ✗';
+    row('Banda Disponível Cliente:', `${d.bandaCliente} Mbps — ${st}`, cor);
+  }
+  y += 2; divider();
+
+  secTitle('▶  DIMENSIONAMENTO ELÉTRICO');
+  row('Corrente Total Câmeras:', d.amp, [22,163,74]);
+  if (d.fonte) row('Fonte Selecionada:', d.fonte + 'A (Multi-saída / Colmeia)');
+  row('Consumo Elétrico Estimado:', d.kwh);
+  if (d.showCusto !== false) row('Custo Mensal Estimado:', d.custo, [234,88,12]);
+  y += 2; divider();
+
+  // CHECKLIST
+  if (d.tech && d.cameras) {
+    const n     = parseInt(d.cameras) || 0;
+    const items = getChecklistDef(d.tech, n, reserva);
+    const cs    = d.checklistState || {};
+    if (y > 190) { doc.addPage(); y = 20; }
+    secTitle('▶  CHECKLIST DE MATERIAIS');
+    items.forEach(item => {
+      if (y > 272) { doc.addPage(); y = 20; }
+      const st  = cs[item.id] || {};
+      const qty = (st.qty !== undefined && st.qty !== null) ? st.qty : '(a definir)';
+      const chk = st.checked;
+      doc.setDrawColor(chk?22:180, chk?163:180, chk?74:180);
+      doc.setLineWidth(0.5); doc.rect(16,y-4,5,5);
+      if (chk) { doc.setDrawColor(22,163,74); doc.setLineWidth(0.8); doc.line(17,y-1.5,18.5,y); doc.line(18.5,y,21,y-3.5); }
+      doc.setFont('helvetica', chk?'normal':'bold');
+      doc.setTextColor(chk?150:30, chk?150:41, chk?150:59);
+      doc.text(item.name.replace(/—.*/,'').trim(), 24, y);
+      doc.setFont('helvetica','normal'); doc.setTextColor(100,116,139);
+      doc.text(`Qtd: ${qty} ${item.unit}`, 196, y, null, null, 'right');
+      (item.notes||[]).filter(n=>n.type==='warn'||n.type==='danger').forEach(n=>{
+        y += 4.5;
+        if (y > 272) { doc.addPage(); y = 20; }
+        doc.setFontSize(7);
+        doc.setTextColor(n.type==='danger'?180:170, n.type==='danger'?30:120, n.type==='danger'?30:0);
+        doc.text(`⚠ ${n.text}`, 24, y);
+        doc.setFontSize(8); doc.setTextColor(100,116,139);
+      });
+      y += 6.5;
+    });
+    y += 3;
+    if (y > 268) { doc.addPage(); y = 20; }
+    doc.setFontSize(7.5); doc.setFont('helvetica','italic'); doc.setTextColor(150,100,0);
+    doc.text('⚠  Cabos, eletrodutos e canaletas: metragem a definir após vistoria técnica in loco.', 105, y, null, null, 'center');
+    y += 8; divider();
+  }
+
+  // OBS
+  if (d.obsGeral) {
+    if (y > 240) { doc.addPage(); y = 20; }
+    secTitle('▶  OBSERVAÇÕES GERAIS');
+    doc.setFontSize(8.5); doc.setFont('helvetica','normal'); doc.setTextColor(71,85,105);
+    const lines = doc.splitTextToSize(d.obsGeral, 178);
+    doc.text(lines, 16, y); y += lines.length * 5 + 6; divider();
+  }
+  if (d.obsEnergia) {
+    if (y > 240) { doc.addPage(); y = 20; }
+    secTitle('▶  OBSERVAÇÕES TÉCNICAS DE ENERGIA');
+    doc.setFontSize(8.5); doc.setFont('helvetica','normal'); doc.setTextColor(71,85,105);
+    const lines = doc.splitTextToSize(d.obsEnergia, 178);
+    doc.text(lines, 16, y); y += lines.length * 5 + 6; divider();
+  }
+
+  // ASSINATURA
+  if (y > 218) { doc.addPage(); y = 20; }
+  secTitle('▶  APROVAÇÃO E ASSINATURA');
+  doc.setFontSize(8.5); doc.setFont('helvetica','normal'); doc.setTextColor(71,85,105);
+  // Técnico
+  doc.text('Técnico Responsável:', 18, y); y += 9;
+  doc.setDrawColor(180,180,180); doc.setLineWidth(0.4);
+  doc.line(18, y, 100, y);
+  doc.setFontSize(7.5); doc.setTextColor(130,130,130);
+  doc.text(d.tecnico || '', 18, y+5);
+  // Cliente
+  doc.setFontSize(8.5); doc.setTextColor(71,85,105);
+  doc.text('Aprovado pelo Cliente:', 120, y-9);
+  doc.line(120, y, 196, y);
+  doc.setFontSize(7.5); doc.setTextColor(130,130,130);
+  doc.text(d.cliente || '', 120, y+5);
+  y += 18;
+  // Data
+  doc.setFontSize(8.5); doc.setTextColor(71,85,105);
+  doc.text('Data de Aprovação:', 18, y); y += 9;
+  doc.line(18, y, 100, y);
+  doc.setFontSize(7.5); doc.setTextColor(130,130,130);
+  doc.text('____/____/________', 18, y+5);
+  y += 16;
+
+  // AVISO VALIDADE
+  if (y < 253) {
+    doc.setFillColor(255,249,230); doc.setDrawColor(251,191,36);
+    doc.roundedRect(14,y,182,12,3,3,'FD');
+    doc.setFontSize(8); doc.setTextColor(146,64,14); doc.setFont('helvetica','italic');
+    doc.text(`⚠  Este documento tem validade de ${d.validade} dias a partir da data de emissão.`, 105, y+7.5, null, null, 'center');
+  }
+
+  // RODAPÉ TODAS AS PÁGINAS
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let pg = 1; pg <= totalPages; pg++) {
+    doc.setPage(pg);
+    doc.setFillColor(4,7,152); doc.rect(0,267,210,30,'F');
+    doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+    doc.text('© 2026 — Desenvolvido por Fênix Soluções Tecnológicas', 105, 274, null, null, 'center');
+    doc.setFont('helvetica','normal'); doc.setTextColor(170,180,255);
+    doc.text('📱 ' + WA_TEXT, 58, 281, null, null, 'center');
+    doc.link(18, 277, 80, 6, { url: WA_LINK });
+    doc.text('|', 105, 281, null, null, 'center');
+    doc.text('📸 ' + IG_TEXT, 152, 281, null, null, 'center');
+    doc.link(108, 277, 84, 6, { url: IG_LINK });
+    if (totalPages > 1) {
+      doc.setFontSize(7); doc.setTextColor(150,160,220);
+      doc.text(`Página ${pg} de ${totalPages}`, 105, 263, null, null, 'center');
     }
+  }
 
-    function listar() {
-        const db = JSON.parse(localStorage.getItem('fenix_v24') || "[]");
-        const list = document.getElementById('historico');
-        list.innerHTML = "";
-        db.reverse().forEach(item => {
-            list.innerHTML += `<div style="background:#fff; padding:10px; border:1px solid #ddd; border-radius:6px; margin-bottom:5px; font-size:0.8rem;">
-                <strong>#${item.id} - ${item.cliente}</strong> (${item.data})
-            </div>`;
-        });
-    }
+  doc.save(fileName);
+  toast(`📄 PDF gerado: ${fileName}`, 'success');
+}
 
-    function gerarPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        const cli = document.getElementById('cliente').value || "Cliente";
-        const val = document.getElementById('validade').value;
+/* ============================================================ AVISO SAIR */
+window.addEventListener('beforeunload', e => {
+  if (isDirty && document.getElementById('cliente').value.trim()) {
+    e.preventDefault(); e.returnValue = '';
+  }
+});
 
-        doc.setFontSize(18); doc.setTextColor(4, 7, 152);
-        doc.text(document.getElementById('empresa').value.toUpperCase(), 105, 20, null, null, "center");
-        
-        doc.setFontSize(10); doc.setTextColor(0);
-        doc.text("ESTUDO TÉCNICO DE INFRAESTRUTURA E VIABILIDADE", 105, 27, null, null, "center");
-        
-        doc.text(`Cliente: ${cli}`, 20, 45);
-        doc.text(`Técnico: ${document.getElementById('tecnico').value}`, 20, 52);
-        doc.text(`Emissão: ${document.getElementById('dataEmissao').value} | Validade: ${val} dias`, 20, 59);
-
-        doc.setDrawColor(200); doc.line(20, 65, 190, 65);
-
-        doc.setFontSize(11); doc.text("DIMENSIONAMENTO DE DADOS", 20, 75);
-        doc.setFontSize(10);
-        doc.text(`- HD Recomendado: ${document.getElementById('hdSugerido').innerText}`, 20, 85);
-        doc.text(`- Banda de Upload Mínima: ${document.getElementById('bandaReal').innerText}`, 20, 92);
-
-        doc.setFontSize(11); doc.text("DIMENSIONAMENTO ELÉTRICO", 20, 110);
-        doc.setFontSize(10);
-        doc.text(`- Fonte p/ Câmeras (Sugerida): ${document.getElementById('ampFinal').innerText}`, 20, 120);
-        doc.text(`- Consumo Estimado: ${document.getElementById('kwhMes').innerText}`, 20, 127);
-        
-        if(document.getElementById('chkShowCusto').checked) {
-            doc.text(`- Valor Mensal Ref. Consumo: ${document.getElementById('custoMoeda').innerText}`, 20, 134);
-        }
-
-        // Rodapé do PDF
-        doc.setFontSize(8); doc.setTextColor(150);
-        doc.text("--------------------------------------------------------------------------------------------------------------------------", 105, 275, null, null, "center");
-        doc.text("Desenvolvido por (c) Fênix Soluções Tecnológicas | (79) 9 9968-0880 | @fenixsolucoestecnologicas", 105, 282, null, null, "center");
-
-        doc.save(`Projeto_Fenix_${cli}.pdf`);
-    }
-
-    window.onload = () => { 
-        document.getElementById('dataEmissao').value = new Date().toLocaleDateString('pt-BR');
-        calcular(); 
-        listar(); 
-    };
+/* ============================================================ INIT */
+window.onload = () => {
+  setupPWA();
+  loadTheme();
+  document.getElementById('dataEmissao').value = new Date().toLocaleDateString('pt-BR');
+  const cod = gerarCodigo();
+  document.getElementById('codigo').value        = cod;
+  document.getElementById('codigoDisplay').textContent = cod;
+  isDirty = false;
+  document.querySelectorAll('input:not([readonly]):not([type=hidden]):not([type=file]),select,textarea')
+    .forEach(el => { el.addEventListener('change', () => { isDirty = true; }); });
+  gerarChecklist();
+};
 </script>
-
 </body>
 </html>
